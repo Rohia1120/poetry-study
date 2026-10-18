@@ -1249,6 +1249,7 @@ html,body{margin:0;min-height:100%;background:light-dark(#eef0e8,#1a201b)}
 :root{color-scheme:light dark}body{padding:0}button,a{cursor:pointer}
 @media(max-width:480px){#poetry-fulltext-reader{padding:0}#poetry-fulltext-reader .pg-phone{width:100%;border:0;border-radius:0;box-shadow:none;min-height:100dvh}}
 </style>
+<style>#poetry-fulltext-reader .pg-report-book{padding:14px 0;border-bottom:1px solid var(--line)}#poetry-fulltext-reader .pg-report-book summary{min-height:44px;display:list-item;align-content:center}#poetry-fulltext-reader textarea{font-size:16px;max-width:100%;width:100%}</style>
 </head>
 <body>
 <script>/**
@@ -20779,6 +20780,7 @@ html,body{margin:0;min-height:100%;background:light-dark(#eef0e8,#1a201b)}
     <div class="pg-app">
       <header class="pg-top"><span class="pg-brand">诗境<span class="pg-stamp">游学</span></span><span class="pg-small">浙江高三 · 古诗文学习</span></header>
       <div class="pg-account"><span id="pg-rank">初入诗境</span><span id="pg-xp" aria-live="polite">0 经验 · 0 枚书签</span></div>
+      <p id="pg-save-status" class="pg-small" role="status" aria-live="polite" style="margin:10px 20px 0"></p>
       <main id="pg-main"></main>
       <nav class="pg-nav" aria-label="主要页面">
         <button type="button" data-nav="home" class="cursor-interaction"><i data-lucide="compass" aria-hidden="true"></i>今日旅程</button>
@@ -20993,10 +20995,70 @@ const levelIndex=()=>levels.reduce((n,l,i)=>state.xp>=l.xp?i:n,0);
 const $=s=>root.querySelector(s),clean=s=>s.replace(/[\s，。！？；、,.!?;：:“”‘’（）()]/g,''),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=name=>`<i data-lucide="${name}" class="pg-icon" aria-hidden="true"></i>`;
 const get=()=>all.find(p=>p.id===state.current);
+// Only durable learning records are stored; dialogs and in-progress answers reset.
+const SAVE_KEY='poetry-study:progress:v1';
+let storageIssue='',storageLocked=false,lastSaved='';
+function storageStatus(message){
+ const node=$('#pg-save-status');if(!node)return;
+ node.textContent=message;node.setAttribute('role',storageIssue?'alert':'status');
+}
+function loadProgress(){
+ try{
+  const raw=globalThis.localStorage.getItem(SAVE_KEY);if(!raw)return;
+  const payload=JSON.parse(raw);
+  if(!payload||payload.version!==1||!payload.state||typeof payload.state!=='object')throw new Error('unsupported record');
+  const s=payload.state,ids=new Set(all.map(p=>p.id));
+  const validKey=k=>typeof k==='string'&&all.some(p=>k===p.id+'-recall'||k===p.id+'-context');
+  const list=(v,check)=>Array.isArray(v)?v.filter(check):[];
+  for(const k of ['xp','ink'])if(Number.isSafeInteger(s[k])&&s[k]>=0)state[k]=s[k];
+  if(typeof s.name==='string'&&s.name.trim())state.name=s.name.trim().slice(0,12);
+  if([2,4,6].includes(s.goal))state.goal=s.goal;
+  if(typeof s.motion==='boolean')state.motion=s.motion;
+  if(['system','light','dark'].includes(s.appearance))state.appearance=s.appearance;
+  if(s.title==='auto'||levels.some(l=>l.name===s.title&&l.xp<=state.xp))state.title=s.title;
+  state.owned=new Set(list(s.owned,id=>goods.some(g=>g.id===id)));
+  for(const type of ['avatar','frame','theme']){
+   const id=s.equipped?.[type];
+   if(id==='default'||(state.owned.has(id)&&goods.some(g=>g.id===id&&g.type===type)))state.equipped[type]=id;
+  }
+  state.read=new Set(list(s.read,id=>ids.has(id)));
+  state.done=new Set(list(s.done,validKey));
+  state.bookmarks=new Set(list(s.bookmarks,id=>ids.has(id)));
+  state.earned=new Set(list(s.earned,k=>k==='welcome'||validKey(k)||(typeof k==='string'&&k.endsWith('-read')&&ids.has(k.slice(0,-5)))));
+  const validQuestion=q=>q&&ids.has(q.id)&&['recall','context'].includes(q.mode);
+  state.mistakes=new Map(list(s.mistakes,p=>Array.isArray(p)&&validQuestion(p[1])&&p[0]===p[1].id+'-'+p[1].mode).map(([k,q])=>[k,{id:q.id,mode:q.mode}]));
+  state.attempts=list(s.attempts,q=>validQuestion(q)&&typeof q.ok==='boolean'&&typeof q.hint==='boolean').map(q=>({id:q.id,mode:q.mode,ok:q.ok,hint:q.hint}));
+  state.ledger=list(s.ledger,x=>x&&typeof x.label==='string'&&Number.isSafeInteger(x.amount)).map(x=>({label:x.label.slice(0,100),amount:x.amount}));
+  if(typeof s.reportId==='string'&&/^[a-zA-Z0-9-]{8,80}$/.test(s.reportId))state.reportId=s.reportId;
+  if(ids.has(s.current))state.current=s.current;
+  if(Number.isInteger(s.book)&&s.book>=0&&s.book<books.length)state.book=s.book;
+ }catch(error){
+  storageLocked=true;storageIssue='无法读取本机存档，原记录已保留。请检查浏览器是否允许保存网站数据。';
+ }
+}
+function saveProgress(){
+ if(storageLocked){storageStatus(storageIssue);return false;}
+ try{
+  const saved={};
+  for(const k of ['reportId','xp','ink','name','goal','motion','appearance','title','equipped','ledger','attempts','current','book'])saved[k]=state[k];
+  for(const k of ['owned','read','earned','done','bookmarks'])saved[k]=[...state[k]];
+  saved.mistakes=[...state.mistakes];
+  const value=JSON.stringify({version:1,state:saved});
+  if(value!==lastSaved){globalThis.localStorage.setItem(SAVE_KEY,value);lastSaved=value;}
+  storageIssue='';storageStatus('已自动保存到本机 · 下次打开可继续');return true;
+ }catch(error){
+  storageIssue='暂时无法保存，请检查浏览器是否允许保存网站数据；退出前请先解决。';
+  storageStatus(storageIssue);return false;
+ }
+}
+loadProgress();
+globalThis.addEventListener('pagehide',saveProgress);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveProgress();});
+
 const completed=id=>Number(state.done.has(id+'-recall'))+Number(state.done.has(id+'-context'));
 function status(p){const n=completed(p.id);return n===2?'片段两关已完成 · 待复测':n?'片段闯关 1 / 2':state.read.has(p.id)?'已阅读 · 待闯关':'尚未开始';}
 function header(){ $('#pg-xp').textContent=`${state.xp} 经验 · ${state.ink} 墨点`;$('#pg-rank').textContent=state.title==='auto'?levels[levelIndex()].name:state.title;}
-function finishRender(nav){state.view=nav;root.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.nav===nav)));header();if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});}
+function finishRender(nav){saveProgress();state.view=nav;root.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.nav===nav)));header();if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});}
 function btn(label,action,cls=''){return `<button type="button" data-action="${action}" class="cursor-interaction ${cls}">${label}</button>`;}
 function hero(p){const b=books[p.bi];return `<section class="pg-hero"><i data-lucide="${b.icon}" class="pg-scene" aria-hidden="true"></i><span class="pg-small">${b.name} · ${b.scene}</span><h2>${p.title}</h2><span class="pg-small">${p.author} · 今日先记住一个片段</span></section>`;}
 function home(){const p=get();main.innerHTML=`<span class="pg-small">每记住一句，就走近一处风景</span><h2>今天，也向诗里走一步。</h2>${hero(p)}${btn('继续这一程','lesson','pg-primary')}<div class="pg-section"><h3>这一程的小目标</h3><span class="pg-small">首次完成可获得</span></div><div class="pg-tasks"><div class="pg-task"><span>${icon('book-open')}</span><div><p>读懂这个片段</p><span class="pg-small">先看原句，再理解意思</span></div><span class="pg-gain">+5 经验</span></div><div class="pg-task"><span>${icon('pen-line')}</span><div><p>独立写出下一句</p><span class="pg-small">不借助提示完成回忆</span></div><span class="pg-gain">+10 经验</span></div><div class="pg-task"><span>${icon('sparkles')}</span><div><p>根据情境找原句</p><span class="pg-small">把意思与句子联系起来</span></div><span class="pg-gain">+10 经验</span></div></div><p class="pg-small" style="margin-top:18px">练完两关，收藏一枚对应诗句书签。</p>`;finishRender('home');}
@@ -21005,7 +21067,7 @@ function book(index,reset=true){state.book=index;if(reset)state.filter='全部';
 function lesson(id){if(id)state.current=id;const p=get();main.innerHTML=`${btn('‹ 返回本册篇目','book','pg-link')}<span class="pg-small" style="display:block">${books[p.bi].name} · ${p.author}</span><h2>${p.title}</h2><span class="pg-tag">片段学习</span> <span class="pg-tag pg-gold-tag">${status(p)}</span><div class="pg-verse">${p.a}，<br>${p.b}。</div><h3>先读懂这一层意思</h3><div class="pg-explain">${p.meaning}</div>${btn(state.read.has(p.id)?'已领取阅读经验 · 再读一遍':'我读完了，收下阅读奖励','read','pg-primary')}<div class="pg-section"><h3>进入片段挑战</h3><span class="pg-small">首次独立答对各 +10</span></div><div class="pg-grid">${btn('第一关 · 默写接句','recall')}${btn('第二关 · 情境寻句','context')}</div><p class="pg-small">阅读打卡不判定背会；两关都独立答对，可领取诗句书签。全篇掌握还需要完整背诵与后续复测。</p>`;finishRender('shelf');}
 function award(key,n){if(state.earned.has(key))return 0;const oldLevel=levelIndex();state.earned.add(key);state.xp+=n;const ink=n===5?1:2;state.ink+=ink;state.ledger.unshift({label:key.endsWith('-read')?'首次阅读片段':'首次独立答对关卡',amount:ink});if(levelIndex()>oldLevel)state.levelNotice=levels[levelIndex()].name;header();return n;}
 let returnFocus=null;
-function popup(title,text,gain,badge,callback){returnFocus=document.activeElement;const confetti=Array.from({length:14},(_,i)=>`<span class="pg-confetti" style="--x:${7+i*6}%;--d:${(i%4)*.07}s" aria-hidden="true"></span>`).join('');overlay.innerHTML=`<section class="pg-dialog" role="dialog" aria-modal="true" aria-labelledby="pg-popup-title" aria-describedby="pg-popup-desc">${confetti}<div class="pg-medal">${icon(badge?'bookmark-check':'party-popper')}</div><span class="pg-small">${badge?'新书签已收藏':'属于你的成长时刻'}</span><h2 id="pg-popup-title">${title}</h2><p id="pg-popup-desc">${text}</p>${gain?`<div class="pg-reward-value">+${gain} 经验 <span class="pg-small">＋${gain===5?1:2} 墨点</span></div>`:''}${state.levelNotice?`<p class="pg-tag pg-gold-tag">升级啦 · ${state.levelNotice}称号已解锁</p>`:''}${badge?`<div class="pg-bookmark"><span class="pg-small">${books[get().bi].scene}</span><p>${get().b}</p><span class="pg-small">《${get().title}》</span></div>`:''}<button type="button" id="pg-close" class="pg-primary cursor-interaction">${badge?'收好书签，继续前行':'收下，继续前行'}</button></section>`;state.levelNotice='';overlay.hidden=false;app.inert=true;if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});const close=()=>{overlay.hidden=true;app.inert=false;if(callback)callback();if(returnFocus&&returnFocus!==document.body&&returnFocus.isConnected)returnFocus.focus();else main.querySelector('button')?.focus();};$('#pg-close').onclick=close;overlay.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){e.preventDefault();$('#pg-close').focus();}};$('#pg-close').focus();}
+function popup(title,text,gain,badge,callback){saveProgress();returnFocus=document.activeElement;const confetti=Array.from({length:14},(_,i)=>`<span class="pg-confetti" style="--x:${7+i*6}%;--d:${(i%4)*.07}s" aria-hidden="true"></span>`).join('');overlay.innerHTML=`<section class="pg-dialog" role="dialog" aria-modal="true" aria-labelledby="pg-popup-title" aria-describedby="pg-popup-desc">${confetti}<div class="pg-medal">${icon(badge?'bookmark-check':'party-popper')}</div><span class="pg-small">${badge?'新书签已收藏':'属于你的成长时刻'}</span><h2 id="pg-popup-title">${title}</h2><p id="pg-popup-desc">${text}</p>${gain?`<div class="pg-reward-value">+${gain} 经验 <span class="pg-small">＋${gain===5?1:2} 墨点</span></div>`:''}${state.levelNotice?`<p class="pg-tag pg-gold-tag">升级啦 · ${state.levelNotice}称号已解锁</p>`:''}${badge?`<div class="pg-bookmark"><span class="pg-small">${books[get().bi].scene}</span><p>${get().b}</p><span class="pg-small">《${get().title}》</span></div>`:''}<button type="button" id="pg-close" class="pg-primary cursor-interaction">${badge?'收好书签，继续前行':'收下，继续前行'}</button></section>`;state.levelNotice='';overlay.hidden=false;app.inert=true;if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});const close=()=>{overlay.hidden=true;app.inert=false;if(callback)callback();if(returnFocus&&returnFocus!==document.body&&returnFocus.isConnected)returnFocus.focus();else main.querySelector('button')?.focus();};$('#pg-close').onclick=close;overlay.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){e.preventDefault();$('#pg-close').focus();}};$('#pg-close').focus();}
 function read(){const p=get();state.read.add(p.id);const n=award(p.id+'-read',5);lesson();if(n)popup('又读完了一篇。','阅读的第一步，已经走出来了。接下来试试不看原文，把它写出来。',n,false);}
 function practice(mode){state.mode=mode;state.hint=false;state.checked=false;state.draft='';drawPractice();}
 function drawPractice(){const p=get(),isContext=state.mode==='context';main.innerHTML=`${btn('‹ 返回篇目','lesson','pg-link')}<span class="pg-small" style="display:block">《${p.title}》· ${isContext?'第二关 · 情境寻句':'第一关 · 默写接句'}</span><h2>${isContext?'循着意思，找到原句。':'让记忆，自己浮现。'}</h2>${isContext?`<div class="pg-explain">${p.meaning}<br><br>请默写刚才所学片段的两部分原文。</div>`:`<div class="pg-verse">${p.a}，<br><span class="pg-small">接下来的一句是什么？</span></div>`}<label for="pg-answer">${isContext?'默写这个片段':'写出下一句'}</label><textarea id="pg-answer" placeholder="试着独立回忆，标点不计入判断"></textarea>${btn('给我一点提示','hint','pg-link')}<p id="pg-hint" class="pg-small"></p><div id="pg-feedback" aria-live="polite"></div>${btn('确认答案','submit','pg-primary')}<p class="pg-small" style="margin-top:14px">提示后答对会记录为练习完成，独立通关需要再次挑战。</p>`;finishRender('shelf');}
@@ -21017,14 +21079,15 @@ function submit(){const p=get(),isContext=state.mode==='context',input=$('#pg-an
  state.attempts.push({id:p.id,mode:state.mode,ok,hint:state.hint});if(!ok)state.mistakes.set(key,{id:p.id,mode:state.mode});
  let gain=0,badge=false;if(ok&&!state.hint){state.done.add(key);state.mistakes.delete(key);gain=award(key,10);if(completed(p.id)===2&&!state.bookmarks.has(p.id)){state.bookmarks.add(p.id);badge=true;}header();}
  feedback.innerHTML=`<div class="pg-feedback"><h3>${ok?(state.hint?'提示帮你找回了这一句':'这一次，独立写对了！'):'差一点，记住这一处。'}</h3><p>${isContext?p.a+'，'+p.b:p.b}。</p><span class="pg-small">${ok?(state.hint?'稍后可以返回篇目，再试一次无提示挑战。':'本次片段通过，长期记忆仍待之后复测。'):'这道题已进入“温故知新”，方便再次练习。'}</span></div>`;
+ saveProgress();
  root.querySelector('[data-action="submit"]').textContent='返回篇目，继续学习';
  if(ok&&!state.hint&&(gain||badge))popup(badge?'恭喜，收下一枚诗句！':'这一句，写得漂亮。',badge?'这个片段的默写与情境两关，都已独立完成。':'你没有借助提示，成功找回了这句原文。',gain,badge);
 }
-function review(){const errors=[...state.mistakes.values()];main.innerHTML=`<span class="pg-small">把薄弱处，变成下一步</span><h2>温故，也是一段旅程。</h2><section class="pg-hero"><h3>本次学习足迹</h3><p>${state.read.size} 个片段已阅读 · ${state.done.size} 个关卡独立通过</p><span class="pg-small">${state.attempts.length} 次作答记录 · 当前体验内保留</span></section><div class="pg-section"><h3>需要再练 ${errors.length} 题</h3></div>${errors.length?`<div class="pg-list">${errors.map(m=>{const p=all.find(x=>x.id===m.id);return `<button type="button" class="pg-entry cursor-interaction" data-retry="${m.id}|${m.mode}"><span class="pg-entry-body"><strong>${p.title}</strong><small>${m.mode==='context'?'情境寻句':'默写接句'} · 再试一次</small></span>${icon('rotate-ccw')}</button>`;}).join('')}</div>`:'<p class="pg-small">暂时没有待重练的错题。练习中写错的题会留在这里。</p>'}<div class="pg-section"><h3>是否已经记牢？</h3></div><p class="pg-small">当前记录说明本次练习表现。隔日复测和完整篇目检测，将用于后续确认长期掌握。</p>`;finishRender('review');}
+function review(){const errors=[...state.mistakes.values()];main.innerHTML=`<span class="pg-small">把薄弱处，变成下一步</span><h2>温故，也是一段旅程。</h2><section class="pg-hero"><h3>累计学习足迹</h3><p>${state.read.size} 个片段已阅读 · ${state.done.size} 个关卡独立通过</p><span class="pg-small">${state.attempts.length} 次作答记录 · 已保存在本机</span></section><div class="pg-section"><h3>需要再练 ${errors.length} 题</h3></div>${errors.length?`<div class="pg-list">${errors.map(m=>{const p=all.find(x=>x.id===m.id);return `<button type="button" class="pg-entry cursor-interaction" data-retry="${m.id}|${m.mode}"><span class="pg-entry-body"><strong>${p.title}</strong><small>${m.mode==='context'?'情境寻句':'默写接句'} · 再试一次</small></span>${icon('rotate-ccw')}</button>`;}).join('')}</div>`:'<p class="pg-small">暂时没有待重练的错题。练习中写错的题会留在这里。</p>'}<div class="pg-section"><h3>是否已经记牢？</h3></div><p class="pg-small">当前记录说明本次练习表现。隔日复测和完整篇目检测，将用于后续确认长期掌握。</p>`;finishRender('review');}
 function collection(){const unlocked=all.filter(p=>state.bookmarks.has(p.id));main.innerHTML=`<span class="pg-small">把努力，留成看得见的纪念</span><h2>你的诗境收藏。</h2><section class="pg-hero"><i data-lucide="award" class="pg-scene" aria-hidden="true"></i><h3>${levels[levelIndex()].name}</h3><p>已积累 ${state.xp} 经验</p><span class="pg-small">40 经验成为书卷旅人 · 100 经验成为诗境行者</span></section><div class="pg-section"><h3>诗句书签</h3><span class="pg-small">已收藏 ${unlocked.length} 枚</span></div><div class="pg-reward-grid">${unlocked.map(p=>`<div class="pg-bookmark">${icon('bookmark-check')}<p>${p.b}</p><span class="pg-small">${p.title}</span></div>`).join('')}${unlocked.length?'':`<div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>第一枚诗句</p><span class="pg-small">完成任一片段的两关</span></div><div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>再遇山河</p><span class="pg-small">继续探索其他篇目</span></div>`}</div><p class="pg-small">同一项首次完成奖励只领取一次。阅读、答题与收藏分别记录，书签不代表全篇已掌握。</p>`;finishRender('collection');}
 function profile(){
  const li=levelIndex(),lv=levels[li],next=levels[li+1],progress=next?Math.min(100,100*(state.xp-lv.xp)/(next.xp-lv.xp)):100;
- main.innerHTML=`<div class="pg-profile-head"><div class="pg-avatar" aria-label="个人头像">${state.equipped.avatar==='bamboo'?'竹':'初'}</div><div><h2>${esc(state.name)}</h2><span class="pg-tag">Lv.${li+1} · ${esc(state.title==='auto'?lv.name:state.title)}</span></div></div><section class="pg-level-card"><div class="pg-level-top"><strong>${lv.name}</strong><span class="pg-small">${state.xp} 总经验</span></div><div class="pg-level-track" role="progressbar" aria-label="当前等级升级进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div><span class="pg-small">${next?`再获得 ${next.xp-state.xp} 经验，成为${next.name}`:'已抵达当前最高等级，仍可继续积累经验'}</span></section><p class="pg-small">本次学习目标：独立通过 ${Math.min(state.done.size,state.goal)} / ${state.goal} 关${state.done.size>=state.goal?' · 已达成':''}</p><div class="pg-wallet"><button type="button" class="cursor-interaction" data-action="shop"><span class="pg-small">我的墨点</span><strong>${state.ink}</strong><span class="pg-small">去兑换心仪装扮 ›</span></button><button type="button" class="cursor-interaction" data-action="collection"><span class="pg-small">诗句书签</span><strong>${state.bookmarks.size}</strong><span class="pg-small">查看学习纪念 ›</span></button></div>${!state.earned.has('welcome')?btn('领取启程礼 · 3 墨点','welcome','pg-primary'):''}<div class="pg-menu">${btn(`${icon('milestone')}<span>成长等级<small style="display:block">查看经验门槛与称号</small></span>${icon('chevron-right')}`,'levels')}${btn(`${icon('store')}<span>诗境小铺<small style="display:block">头像、书签边框与主题</small></span>${icon('chevron-right')}`,'shop')}${btn(`${icon('package-open')}<span>我的装扮<small style="display:block">已拥有 ${state.owned.size} 件 · 可随时换用</small></span>${icon('chevron-right')}`,'inventory')}${btn(`${icon('settings-2')}<span>个人设置<small style="display:block">昵称、目标、称号与庆祝动效</small></span>${icon('chevron-right')}`,'settings')}</div><p class="pg-small">经验记录成长，墨点用于兑换，书签永久保留为纪念。当前数据在本次体验中保留。</p>`;
+ main.innerHTML=`<div class="pg-profile-head"><div class="pg-avatar" aria-label="个人头像">${state.equipped.avatar==='bamboo'?'竹':'初'}</div><div><h2>${esc(state.name)}</h2><span class="pg-tag">Lv.${li+1} · ${esc(state.title==='auto'?lv.name:state.title)}</span></div></div><section class="pg-level-card"><div class="pg-level-top"><strong>${lv.name}</strong><span class="pg-small">${state.xp} 总经验</span></div><div class="pg-level-track" role="progressbar" aria-label="当前等级升级进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div><span class="pg-small">${next?`再获得 ${next.xp-state.xp} 经验，成为${next.name}`:'已抵达当前最高等级，仍可继续积累经验'}</span></section><p class="pg-small">本次学习目标：独立通过 ${Math.min(state.done.size,state.goal)} / ${state.goal} 关${state.done.size>=state.goal?' · 已达成':''}</p><div class="pg-wallet"><button type="button" class="cursor-interaction" data-action="shop"><span class="pg-small">我的墨点</span><strong>${state.ink}</strong><span class="pg-small">去兑换心仪装扮 ›</span></button><button type="button" class="cursor-interaction" data-action="collection"><span class="pg-small">诗句书签</span><strong>${state.bookmarks.size}</strong><span class="pg-small">查看学习纪念 ›</span></button></div>${!state.earned.has('welcome')?btn('领取启程礼 · 3 墨点','welcome','pg-primary'):''}<div class="pg-menu">${btn(`${icon('send')}<span>生成学习报告<small style="display:block">复制后通过微信发给老师</small></span>${icon('chevron-right')}`,'share-report')}${btn(`${icon('graduation-cap')}<span>老师端<small style="display:block">粘贴报告，查看学生进度与错题</small></span>${icon('chevron-right')}`,'teacher')}${btn(`${icon('milestone')}<span>成长等级<small style="display:block">查看经验门槛与称号</small></span>${icon('chevron-right')}`,'levels')}${btn(`${icon('store')}<span>诗境小铺<small style="display:block">头像、书签边框与主题</small></span>${icon('chevron-right')}`,'shop')}${btn(`${icon('package-open')}<span>我的装扮<small style="display:block">已拥有 ${state.owned.size} 件 · 可随时换用</small></span>${icon('chevron-right')}`,'inventory')}${btn(`${icon('settings-2')}<span>个人设置<small style="display:block">昵称、目标、称号与庆祝动效</small></span>${icon('chevron-right')}`,'settings')}</div><p class="pg-small">经验记录成长，墨点用于兑换，书签保留为纪念。进度与设置自动保存在本机，关闭页面后仍可继续。</p>`;
  finishRender('profile');
 }
 function levelPage(){const li=levelIndex();main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<span class="pg-small" style="display:block">每一段努力，都有回响</span><h2>你的成长之路。</h2><span class="pg-tag">当前累计 ${state.xp} 经验</span>${levels.map((lv,i)=>`<div class="pg-level-row"><span class="pg-level-token">Lv.${i+1}</span><div><strong>${lv.name} ${i===li?'· 当前':''}</strong><p class="pg-small">累计 ${lv.xp} 经验 · ${i<=li?'已解锁':'待解锁'}</p><span class="pg-small">${lv.benefit}</span></div></div>`).join('')}<div class="pg-section"><h3>经验怎么获得？</h3></div><p class="pg-small">首次阅读一个片段：5 经验＋1 墨点。<br>首次独立答对一关：10 经验＋2 墨点。<br>同一项奖励只领取一次；查看提示后可以重新独立挑战。</p><p class="pg-small">升级解锁称号；所有学习篇目始终可以进入。兑换装扮不扣经验，也不会降低等级。</p>`;finishRender('profile');}
@@ -21036,17 +21099,80 @@ function useGood(id){const g=goods.find(x=>x.id===id);if(!g||!state.owned.has(id
 function redeem(id){const g=goods.find(x=>x.id===id);if(!g)return;if(state.owned.has(id)){useGood(id);return;}if(state.ink<g.price){popup('再走一小程，就更近了。',`还差 ${g.price-state.ink} 墨点可以兑换${g.name}。首次阅读和独立答题都能赚取墨点。`,0,false);return;}showConfirm(`兑换${g.name}？`,`消耗 ${g.price} 墨点，兑换后剩余 ${state.ink-g.price} 墨点。兑换后会立即为你换上。`,()=>{if(state.owned.has(id)||state.ink<g.price)return;state.ink-=g.price;state.owned.add(id);state.equipped[g.type]=id;state.ledger.unshift({label:'兑换'+g.name,amount:-g.price});applyLook();shop();popup('新装扮，已经换上。',`${g.name}已放入“我的装扮”，以后可以免费切换使用。`,0,false);});}
 function inventory(){const mine=goods.filter(g=>state.owned.has(g.id));main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>我的装扮。</h2><p class="pg-small">喜欢的装扮，想用时就换上。</p>${mine.length?mine.map(g=>`<section class="pg-shop-item"><div class="pg-item-preview">${g.mark}</div><h3>${g.name}</h3><p>${g.desc}</p><button type="button" data-good="${g.id}" class="cursor-interaction" ${state.equipped[g.type]===g.id?'disabled':''}>${state.equipped[g.type]===g.id?'使用中':'换上这一件'}</button></section>`).join(''):'<section class="pg-hero"><h3>行囊还在等待第一件收藏。</h3><p class="pg-small">领取启程礼，就能兑换青竹头像。</p></section>'}<div class="pg-grid">${btn('前往诗境小铺','shop')}${btn('恢复默认装扮','reset-look')}</div>`;finishRender('profile');}
 function ledger(){main.innerHTML=`${btn('‹ 返回小铺','shop','pg-link')}<h2>墨点收支。</h2><span class="pg-tag pg-gold-tag">当前余额 ${state.ink} 墨点</span><div style="margin-top:18px">${state.ledger.length?state.ledger.map(x=>`<div class="pg-ledger-row"><span>${esc(x.label)}</span><span class="pg-shop-price">${x.amount>0?'+':''}${x.amount}</span></div>`).join(''):'<p class="pg-small">还没有收支记录。先去领取启程礼或完成学习。</p>'}</div>`;finishRender('profile');}
-function settings(){main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>按自己的节奏来。</h2><div class="pg-setting"><label for="pg-name">昵称</label><input id="pg-name" maxlength="12" value="${esc(state.name)}" placeholder="给自己起个诗境昵称"></div><div class="pg-setting"><label for="pg-goal">每次学习的小目标</label><select id="pg-goal">${[2,4,6].map(n=>`<option value="${n}" ${state.goal===n?'selected':''}>独立答对 ${n} 个关卡</option>`).join('')}</select></div><div class="pg-setting"><label for="pg-title">佩戴称号</label><select id="pg-title"><option value="auto">自动佩戴当前最高等级称号</option>${levels.filter(l=>state.xp>=l.xp).map(l=>`<option value="${l.name}" ${state.title===l.name?'selected':''}>${l.name}</option>`).join('')}</select></div><div class="pg-setting"><label for="pg-appearance">显示模式</label><select id="pg-appearance">${[['system','跟随系统'],['light','浅色'],['dark','深色']].map(([v,t])=>`<option value="${v}" ${state.appearance===v?'selected':''}>${t}</option>`).join('')}</select></div><div class="pg-setting"><label class="pg-motion-label"><input type="checkbox" id="pg-motion" ${state.motion?'checked':''} style="width:20px;min-height:20px;margin:0 8px 0 0;vertical-align:middle">开启庆祝动效</label><span class="pg-small">关闭后仍显示奖励弹窗，省去撒花和弹跳。</span></div><div id="pg-setting-feedback" aria-live="polite"></div>${btn('保存设置','save-settings','pg-primary')}<p class="pg-small" style="margin-top:14px">设置与学习记录在当前体验中生效。</p>`;finishRender('profile');}
-function saveSettings(){const name=$('#pg-name').value.trim();if(!name){$('#pg-setting-feedback').innerHTML='<p class="pg-error" role="alert">先填一个昵称吧。</p>';return;}state.name=name.slice(0,12);state.goal=Number($('#pg-goal').value);state.title=$('#pg-title').value;state.appearance=$('#pg-appearance').value;state.motion=$('#pg-motion').checked;applyLook();profile();popup('设置已保存。','新的昵称、学习目标和显示偏好，现在已经生效。',0,false);}
+function settings(){main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>按自己的节奏来。</h2><div class="pg-setting"><label for="pg-name">昵称</label><input id="pg-name" maxlength="12" value="${esc(state.name)}" placeholder="给自己起个诗境昵称"></div><div class="pg-setting"><label for="pg-goal">每次学习的小目标</label><select id="pg-goal">${[2,4,6].map(n=>`<option value="${n}" ${state.goal===n?'selected':''}>独立答对 ${n} 个关卡</option>`).join('')}</select></div><div class="pg-setting"><label for="pg-title">佩戴称号</label><select id="pg-title"><option value="auto">自动佩戴当前最高等级称号</option>${levels.filter(l=>state.xp>=l.xp).map(l=>`<option value="${l.name}" ${state.title===l.name?'selected':''}>${l.name}</option>`).join('')}</select></div><div class="pg-setting"><label for="pg-appearance">显示模式</label><select id="pg-appearance">${[['system','跟随系统'],['light','浅色'],['dark','深色']].map(([v,t])=>`<option value="${v}" ${state.appearance===v?'selected':''}>${t}</option>`).join('')}</select></div><div class="pg-setting"><label class="pg-motion-label"><input type="checkbox" id="pg-motion" ${state.motion?'checked':''} style="width:20px;min-height:20px;margin:0 8px 0 0;vertical-align:middle">开启庆祝动效</label><span class="pg-small">关闭后仍显示奖励弹窗，省去撒花和弹跳。</span></div><div id="pg-setting-feedback" aria-live="polite"></div>${btn('保存设置','save-settings','pg-primary')}<p class="pg-small" style="margin-top:14px">点击保存设置后，设置与学习记录保存在当前浏览器；更换设备或浏览器不会自动同步。</p>`;finishRender('profile');}
+function saveSettings(){const name=$('#pg-name').value.trim();if(!name){$('#pg-setting-feedback').innerHTML='<p class="pg-error" role="alert">先填一个昵称吧。</p>';return;}state.name=name.slice(0,12);state.goal=Number($('#pg-goal').value);state.title=$('#pg-title').value;state.appearance=$('#pg-appearance').value;state.motion=$('#pg-motion').checked;applyLook();profile();popup(storageIssue?'设置已生效，暂未保存到本机。':'设置已保存。',storageIssue||'新的昵称、学习目标和显示偏好已保存到本机，下次打开仍会保留。',0,false);}
 function lesson(id){if(id)state.current=id;const p=get();main.innerHTML=`${btn('‹ 返回本册篇目','book','pg-link')}<span class="pg-small" style="display:block">${books[p.bi].name} · ${p.author}</span><h2>${esc(p.title)}</h2><span class="pg-tag">${p.scope}</span><div class="pg-full-original">${p.paragraphs.map(t=>`<p>${esc(t)}</p>`).join('')}</div>${btn(state.read.has(p.id)?'已阅读本篇 · 再读一遍':'我已阅读本篇 · 领取阅读奖励','read','pg-primary')}<div class="pg-section"><h3>原有片段练习</h3></div><div class="pg-grid">${btn('默写接句','recall')}${btn('情境寻句','context')}</div><details><summary class="cursor-interaction pg-small">原文版本与资料来源</summary><p class="pg-small">教材选入的是节选时，此处展示该节选文本；不同版本的字形与节选范围请与所用教材核对。</p><a class="pg-reader-source" href="${p.source}" target="_blank" rel="noopener noreferrer">查看校读资料</a></details>`;finishRender('shelf');}
+const TEACHER_KEY='poetry-study:teacher-reports:v1';
+let teacherIssue='';
+function reportKey(k){return typeof k==='string'&&all.some(p=>k===p.id+'-recall'||k===p.id+'-context');}
+function checkReport(r){
+ const ids=new Set(all.map(p=>p.id)),integer=n=>Number.isSafeInteger(n)&&n>=0&&n<=1000000;
+ if(!r||r.version!==1||typeof r.id!=='string'||!/^[a-zA-Z0-9-]{8,80}$/.test(r.id)||typeof r.name!=='string'||!r.name.trim()||r.name.length>12||!Number.isFinite(Date.parse(r.generatedAt))||!integer(r.xp)||!integer(r.tries)||!integer(r.independent)||!integer(r.correct)||r.independent>r.tries||r.correct>r.independent)throw Error('报告格式不正确，请让学生重新生成并复制完整报告。');
+ for(const [key,check,max]of [['read',v=>ids.has(v),all.length],['done',reportKey,all.length*2],['mistakes',reportKey,all.length*2]]){
+  if(!Array.isArray(r[key])||r[key].length>max||r[key].some(v=>!check(v)))throw Error('报告中的篇目无法识别，请使用同一版本的网站。');
+ }
+ return {version:1,id:r.id,name:r.name.trim(),generatedAt:new Date(r.generatedAt).toISOString(),xp:r.xp,tries:r.tries,independent:r.independent,correct:r.correct,read:[...new Set(r.read)],done:[...new Set(r.done)],mistakes:[...new Set(r.mistakes)]};
+}
+function makeReport(){
+ if(!state.reportId)state.reportId=globalThis.crypto?.randomUUID?.()||('student-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
+ saveProgress();
+ return checkReport({version:1,id:state.reportId,name:state.name,generatedAt:new Date().toISOString(),xp:state.xp,read:[...state.read],done:[...state.done],mistakes:[...state.mistakes.keys()],tries:state.attempts.length,independent:state.attempts.filter(x=>!x.hint).length,correct:state.attempts.filter(x=>!x.hint&&x.ok).length});
+}
+function reportCode(r){return 'SJ1.'+btoa(encodeURIComponent(JSON.stringify(r)));}
+function parseReport(text){
+ if(typeof text!=='string'||text.length>30000)throw Error('请粘贴完整的一份学习报告。');
+ const code=text.match(/SJ1\.([A-Za-z0-9+/=]+)/);if(!code)throw Error('没有找到报告码，请复制包含 SJ1. 开头代码的完整报告。');
+ try{return checkReport(JSON.parse(decodeURIComponent(atob(code[1]))));}catch(e){throw Error('报告码不完整或格式错误，请让学生重新复制。');}
+}
+function reportDate(r){return new Date(r.generatedAt).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});}
+function reportSummary(r){return `<section class="pg-hero"><h3>${esc(r.name)}的学习进度</h3><p>已阅读 ${r.read.length} / ${all.length} 篇<br>片段独立通关 ${r.done.length} / ${all.length*2} 关<br>待重练 ${r.mistakes.length} 题 · 累计 ${r.xp} 经验</p><span class="pg-small">累计作答 ${r.tries} 次 · 独立作答正确率 ${r.independent?Math.round(100*r.correct/r.independent)+'%':'暂无'}<br>报告生成：${reportDate(r)}</span></section>`;}
+function shareReport(){
+ const r=makeReport();
+ const text=`诗境学习报告｜${r.name}\n已阅读 ${r.read.length}/${all.length} 篇，片段独立通关 ${r.done.length}/${all.length*2} 关，待重练 ${r.mistakes.length} 题。\n报告生成：${reportDate(r)}\n老师在网站「我的 → 老师端」粘贴此消息即可查看。\n${reportCode(r)}`;
+ main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>把努力，分享给老师。</h2>${reportSummary(r)}<p class="pg-small">先在个人设置填好自己的昵称。点下方复制，再通过微信发送给老师。</p><label for="pg-report-output">学习报告</label><textarea id="pg-report-output" readonly rows="5" style="overflow-wrap:anywhere"></textarea>${btn('复制报告，发给老师','copy-report','pg-primary')}<p id="pg-report-feedback" class="pg-small" aria-live="polite"></p><p class="pg-small">报告只包含昵称与学习统计，不包含个人设置。报告记录生成时的进度；继续学习后请重新生成。</p>`;
+ $('#pg-report-output').value=text;finishRender('profile');
+}
+async function copyReport(){
+ const output=$('#pg-report-output'),message=$('#pg-report-feedback');
+ try{await navigator.clipboard.writeText(output.value);message.textContent='已复制。请打开微信，粘贴发给老师。';}
+ catch(error){output.focus();output.select();message.textContent='请长按报告框，选择“全选 → 复制”，再发给老师。';}
+}
+function savedReports(){
+ teacherIssue='';
+ try{const raw=globalThis.localStorage.getItem(TEACHER_KEY);if(!raw)return [];const rows=JSON.parse(raw);if(!Array.isArray(rows)||rows.length>100)throw Error('invalid');return rows.map(checkReport);}
+ catch(e){teacherIssue='本机报告暂时无法读取，原记录已保留。请检查浏览器的网站数据设置。';return [];}
+}
+function teacher(){
+ const rows=savedReports().sort((a,b)=>Date.parse(b.generatedAt)-Date.parse(a.generatedAt));
+ main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<span class="pg-small">简易老师端 · 报告查看</span><h2>看看学生走到了哪里。</h2><p class="pg-small">让学生进入「我的 → 生成学习报告」复制发给你。粘贴整条消息即可查看，不需要注册。</p><label for="pg-report-input">粘贴学生发来的学习报告</label><textarea id="pg-report-input" rows="4" maxlength="30000" placeholder="包含 SJ1. 开头报告码的完整消息"></textarea>${btn('导入并查看进度','import-report','pg-primary')}<p id="pg-import-feedback" aria-live="polite" class="pg-small">${esc(teacherIssue)}</p><div class="pg-section"><h3>已收到的学生报告</h3><span class="pg-small">${rows.length} 份</span></div>${rows.length?`<div class="pg-list">${rows.map(r=>`<button type="button" class="pg-entry cursor-interaction" data-report="${r.id}"><span class="pg-entry-body"><strong>${esc(r.name)}</strong><small>已读 ${r.read.length} 篇 · 片段通关 ${r.done.length} 关 · 待重练 ${r.mistakes.length} 题</small><small>生成于 ${reportDate(r)}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`:'<p class="pg-small">还没有报告。导入第一份后，就能看到学生进度。</p>'}<p class="pg-small">这里显示学生主动发送的报告，不会实时更新。导入记录保存在当前浏览器；不会改变你自己的学习进度。</p>`;finishRender('profile');
+}
+function importReport(){
+ const feedback=$('#pg-import-feedback');
+ try{
+  const r=parseReport($('#pg-report-input').value),rows=savedReports();
+  if(teacherIssue)throw Error(teacherIssue);
+  const old=rows.find(x=>x.id===r.id);
+  if(old&&Date.parse(old.generatedAt)>Date.parse(r.generatedAt))throw Error('这份报告比已保存的旧，请让学生发送最新报告。');
+  if(!old&&rows.length>=100)throw Error('当前浏览器已保存100名学生的报告。');
+  const next=[r,...rows.filter(x=>x.id!==r.id)];
+  try{globalThis.localStorage.setItem(TEACHER_KEY,JSON.stringify(next));}catch(e){throw Error('报告暂时无法保存，请检查浏览器是否允许保存网站数据。');}
+  teacherDetail(r.id);
+ }catch(e){feedback.textContent=e.message;feedback.setAttribute('role','alert');}
+}
+function teacherDetail(id){
+ const r=savedReports().find(x=>x.id===id);if(!r){teacher();return;}
+ main.innerHTML=`${btn('‹ 返回老师端','teacher','pg-link')}<h2>${esc(r.name)}的报告。</h2>${reportSummary(r)}<div class="pg-section"><h3>需要再练的题目</h3></div>${r.mistakes.length?`<div class="pg-list">${r.mistakes.map(k=>{const p=all.find(p=>k===p.id+'-recall'||k===p.id+'-context');return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${k.endsWith('-context')?'情境寻句':'默写接句'}</small></span></div>`;}).join('')}</div>`:'<p class="pg-small">报告中没有待重练题目。</p>'}<div class="pg-section"><h3>按教材查看篇目进度</h3></div>${books.map(b=>`<details class="pg-report-book"><summary class="cursor-interaction">${b.name} · 已读 ${b.items.filter(p=>r.read.includes(p.id)).length}/${b.items.length} 篇</summary>${b.items.map(p=>{const n=Number(r.done.includes(p.id+'-recall'))+Number(r.done.includes(p.id+'-context'));return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${r.read.includes(p.id)?'已阅读':'未打卡'} · 片段独立通关 ${n}/2</small></span></div>`;}).join('')}</details>`).join('')}<p class="pg-small">这是一份学生设备生成的学习记录，反映阅读打卡和片段练习表现，不能据此认定全篇已经背会。更新进度时，请学生重新发报告。</p>`;finishRender('profile');
+}
+
 root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
  if(b.dataset.nav){({home,shelf,review,collection,profile}[b.dataset.nav])();return;}
+ if(b.dataset.report){teacherDetail(b.dataset.report);return;}
  if(b.dataset.good){redeem(b.dataset.good);return;}
  if(b.dataset.book!==undefined){book(Number(b.dataset.book));return;}
  if(b.dataset.poem){lesson(b.dataset.poem);return;}
  if(b.dataset.filter){state.filter=b.dataset.filter;book(state.book,false);return;}
  if(b.dataset.retry){const [id,mode]=b.dataset.retry.split('|');state.current=id;practice(mode);return;}
- const actions={home,shelf,profile,collection,levels:levelPage,shop,inventory,ledger,settings,welcome,'save-settings':saveSettings,'reset-look':()=>{state.equipped={avatar:'default',frame:'default',theme:'default'};applyLook();inventory();},book:()=>book(get().bi),lesson:()=>lesson(),read,recall:()=>practice('recall'),context:()=>practice('context'),hint,submit};if(actions[b.dataset.action])actions[b.dataset.action]();
+ const actions={home,shelf,profile,collection,teacher,'share-report':shareReport,'copy-report':copyReport,'import-report':importReport,levels:levelPage,shop,inventory,ledger,settings,welcome,'save-settings':saveSettings,'reset-look':()=>{state.equipped={avatar:'default',frame:'default',theme:'default'};applyLook();inventory();},book:()=>book(get().bi),lesson:()=>lesson(),read,recall:()=>practice('recall'),context:()=>practice('context'),hint,submit};if(actions[b.dataset.action])actions[b.dataset.action]();
 });
 applyLook();shelf();
 })();
