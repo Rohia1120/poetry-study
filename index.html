@@ -21036,6 +21036,31 @@ for(const p of all){
  }
  p.questions=questionBank.filter(q=>q.poemId===p.id&&q.mode==='recall');
 }
+// Complete sentences preserve commas, colons, short phrases, and paragraph boundaries.
+for(const p of all){
+ for(const q of p.questions)q.legacy=true;
+ const sentences=p.paragraphs.flatMap((paragraph,pi)=>{
+  const parts=paragraph.match(/[^。！？]+[。！？]+[”’」』]?|[^。！？]+$/gu)||[];
+  return parts.map(text=>({text:text.trim(),paragraph:pi})).filter(x=>normalizeAnswer(x.text));
+ });
+ for(let i=sentences.length-1;i>=0;i--){if(normalizeAnswer(sentences[i].text).length<4){if(i+1<sentences.length&&sentences[i+1].paragraph===sentences[i].paragraph){sentences[i+1].text=sentences[i].text+sentences[i+1].text;sentences.splice(i,1);}else if(i>0&&sentences[i-1].paragraph===sentences[i].paragraph){sentences[i-1].text+=sentences[i].text;sentences.splice(i,1);}}}
+ p.sentences=sentences;
+ sentences.forEach((item,i)=>{
+  const base={poemId:p.id,mode:'recall',sentenceUnit:true,paragraph:item.paragraph};
+  if(i>0)addQuestion({...base,id:p.id+'-sentence-v2-next-'+i,kind:'接下句',cue:sentences[i-1].text,answer:item.text});
+  if(i<sentences.length-1)addQuestion({...base,id:p.id+'-sentence-v2-prev-'+i,kind:'补上句',cue:sentences[i+1].text,answer:item.text});
+  // Blank whole comma-delimited clauses, while displaying the entire sentence.
+  const clauses=[...item.text.matchAll(/[^，；：。！？“”‘’「」『』]+/gu)].filter(m=>normalizeAnswer(m[0]).length>=4);
+  clauses.forEach((m,j)=>addQuestion({...base,id:p.id+'-sentence-v2-cloze-'+i+'-'+j,kind:'句中填空',cue:item.text.slice(0,m.index)+'＿＿＿＿'+item.text.slice(m.index+m[0].length),answer:m[0],original:item.text}));
+ });
+ // Repeated short prompts need an explicit surrounding sentence to be unambiguous.
+ const current=questionBank.filter(q=>q.poemId===p.id&&q.sentenceUnit);
+ for(const kind of ['接下句','补上句']){
+  const groups=new Map();for(const q of current.filter(q=>q.kind===kind)){const k=normalizeAnswer(q.cue);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(q);}
+  for(const qs of groups.values())if(new Set(qs.map(q=>normalizeAnswer(q.answer))).size>1){for(const q of qs){const i=Number(q.id.split('-').at(-1));q.cue=kind==='接下句'?sentences.slice(0,i).map(x=>x.text).join(''):sentences.slice(i+1).map(x=>x.text).join('');}}
+ }
+ p.questions=current;
+}
 // Curated exam questions; legacy context IDs remain solely for saved progress compatibility.
 const examQuestions=[{"id": "exam-23-bj-1", "titleKey": "蜀相", "mode": "context", "kind": "理解性默写", "cue": "宗泽临终仍惦念北伐未成。请用《蜀相》中感叹功业未成、令人悲痛的两句表现这一心境。\n“＿＿＿＿，＿＿＿＿”。", "answer": "出师未捷身先死，长使英雄泪满襟", "explanation": "抓住“壮志未酬”和“后人悲悼”。", "sourceLabel": "2023年北京卷·15(1)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-bj-2", "titleKey": "临安春雨初霁", "mode": "context", "kind": "理解性默写", "cue": "绍兴“杏卖桥”的名称关联陆游《临安春雨初霁》。请写出包含雨声与卖花声的那一联。\n“＿＿＿＿，＿＿＿＿”。", "answer": "小楼一夜听春雨，深巷明朝卖杏花", "explanation": "题目把地名典故与诗中的生活画面联系起来。", "sourceLabel": "2023年北京卷·15(2)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-bj-3", "titleKey": "子路", "mode": "context", "kind": "理解性默写", "cue": "《论语》描写暮春出游：众人到沂水沐浴后，在哪里吹风，又以怎样的方式返回？补写这两部分原文。\n“＿＿＿＿，＿＿＿＿”。", "answer": "风乎舞雩，咏而归", "explanation": "这里考查曾皙所描绘的暮春生活图景。", "sourceLabel": "2023年北京卷·15(3)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-bj-4", "titleKey": "六国论", "mode": "context", "kind": "理解性默写", "cue": "《六国论》先指出土地有限而秦国贪欲无尽，接着用哪两句说明割地越多、侵逼越急？\n“＿＿＿＿，＿＿＿＿”。", "answer": "奉之弥繁，侵之愈急", "explanation": "注意“弥”与“愈”共同构成递进关系。", "sourceLabel": "2023年北京卷·15(4)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-ii-1", "titleKey": "伶官传序", "mode": "context", "kind": "理解性默写", "cue": "《五代史伶官传序》叙述李存勖出征前到祖庙请出三箭。请默写祭告祖庙、请取箭矢的两部分。\n“＿＿＿＿，＿＿＿＿”。", "answer": "则遣从事以一少牢告庙，请其矢", "explanation": "线索是出兵之前的祭告程序，不是得胜之后的还箭。", "sourceLabel": "2023年新课标Ⅱ卷·17(1)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-ii-2", "titleKey": "临安春雨初霁", "mode": "context", "kind": "理解性默写", "cue": "《临安春雨初霁》中，哪一联借春雨和杏花营造日常景象，却暗含诗人忧思、长夜难眠？\n“＿＿＿＿，＿＿＿＿”。", "answer": "小楼一夜听春雨，深巷明朝卖杏花", "explanation": "“一夜”是理解彻夜未眠的重要线索。", "sourceLabel": "2023年新课标Ⅱ卷·17(2)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-yi-1", "titleKey": "琵琶行", "mode": "context", "kind": "理解性默写", "cue": "《琵琶行》中，演奏结束后，琵琶女怎样收拨、整理衣裳并显露庄重神态？默写承接演奏、引出身世叙述的两句。\n“＿＿＿＿，＿＿＿＿”。", "answer": "沉吟放拨插弦中，整顿衣裳起敛容", "explanation": "动作描写的位置在演奏结束后、身世自述之前。", "sourceLabel": "2023年全国乙卷·16(1)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-yi-2", "titleKey": "赤壁赋", "mode": "context", "kind": "理解性默写", "cue": "张孝祥以大片水面中的一叶小舟写泛舟景象。《赤壁赋》中哪两句也写任小舟漂流于辽阔江面？\n“＿＿＿＿，＿＿＿＿”。", "answer": "纵一苇之所如，凌万顷之茫然", "explanation": "“一苇”写小舟，“万顷”写水面，注意大小的对照。", "sourceLabel": "2023年全国乙卷·16(2)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-23-i-2", "titleKey": "李凭箜篌引", "mode": "context", "kind": "理解性默写", "cue": "史料记载一种竖箜篌有二十二弦。《李凭箜篌引》中哪两句提供了另一种弦数的文学记载？\n“＿＿＿＿，＿＿＿＿”。", "answer": "十二门前融冷光，二十三丝动紫皇", "explanation": "弦数线索落在“二十三丝”，需要同时写出它的上句。", "sourceLabel": "2023年新课标Ⅰ卷·17(2)", "sourceUrl": "https://www.intowz.com/page/23-10-16/203006.html", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-24-i-1", "titleKey": "屈原列传", "mode": "context", "kind": "理解性默写", "cue": "《屈原列传》评价屈原作品：文字涉及的事物虽小，旨趣却宏大；取例虽近，表达的意义却深远。请默写对应两句。\n“＿＿＿＿，＿＿＿＿”。", "answer": "其称文小而其指极大，举类迩而见义远", "explanation": "注意“指”通“旨”；按课文原字书写，“迩”是近的意思。", "sourceLabel": "2024年新课标Ⅰ卷·17(1)", "sourceUrl": "https://zy.21cnjy.com/20573556", "adaptation": "真题考点改编（非原题逐字转载）"}, {"id": "exam-24-i-2", "titleKey": "归园田居", "mode": "context", "kind": "理解性默写", "cue": "为取意陶渊明生活的民宿配置庭院树木，可参考《归园田居（其一）》哪两句中屋前、檐后的树种与位置？\n“＿＿＿＿，＿＿＿＿”。", "answer": "榆柳荫后檐，桃李罗堂前", "explanation": "依次填写檐后的榆柳、堂前的桃李。", "sourceLabel": "2024年新课标Ⅰ卷·17(2)", "sourceUrl": "https://zy.21cnjy.com/20573556", "adaptation": "真题考点改编（非原题逐字转载）"}];
 for(const q of examQuestions){const p=all.find(p=>p.title.includes(q.titleKey));if(!p)throw new Error('Missing exam work: '+q.titleKey);addQuestion({...q,poemId:p.id});}
@@ -21335,7 +21360,7 @@ function checkReading(){
 }
 function practice(mode,questionId){
  let pool,owner=null;
- if(mode==='review')pool=[...state.mistakes.keys()].map(k=>questionMap.get(k)).filter(Boolean);
+ if(mode==='review')pool=[...state.mistakes.keys()].map(k=>questionMap.get(k)).filter(q=>q&&!q.legacy);
  else if(mode==='context')pool=questionBank.filter(q=>q.mode==='context'&&!q.legacy);
  else {pool=get().questions;owner=get().id;}
  if(!pool.length){review();return;}
@@ -21357,7 +21382,7 @@ function practice(mode,questionId){
 }
 function drawPractice(){
  if(!round||round.finished)return;const q=round.queue[round.index],p=all.find(p=>p.id===q.poemId);state.current=p.id;state.mode=q.mode;state.hint=false;state.checked=false;
- main.innerHTML=`${btn('‹ 结束本轮，返回篇目','lesson','pg-link')}<div class="pg-round-top"><span class="pg-tag">第${round.index+1} / ${round.queue.length}题</span><span id="pg-streak" class="pg-tag pg-gold-tag">连对 ${round.streak}题 · 本轮最高${round.best}题</span></div><p class="pg-small">《${p.title}》· ${p.author} · ${q.kind}</p><h2>${q.kind==='补上句'?'回忆它的上一句。':q.kind==='句中填空'?'把缺少的字词补完整。':q.mode==='context'?'读懂题意，默写名句。':'让下一句，自己浮现。'}</h2><div class="${q.mode==='context'?'pg-explain':'pg-verse'}" style="white-space:pre-line">${q.kind==='补上句'?'＿＿＿＿，<br>':''}${esc(q.cue)}${q.kind==='接下句'?'，<br>＿＿＿＿':''}</div>${q.sourceLabel?`<p class="pg-small"><strong>${esc(q.sourceLabel)}</strong><br>${esc(q.adaptation)} · <a href="${esc(q.sourceUrl)}" target="_blank" rel="noopener noreferrer">核对试题来源</a></p>`:''}<label for="pg-answer">${q.kind==='句中填空'?'填写横线处缺少的字词，也可填写完整分句':q.mode==='context'?'按空格顺序填写两部分原文，可用换行或标点分隔':'填写缺少的分句，也可连同题干一起填写'}</label><textarea id="pg-answer" rows="3" placeholder="标点与空格不计入判断"></textarea>${btn('给我一点提示（会中断连对）','hint','pg-link')}<p id="pg-hint" class="pg-small"></p><div id="pg-feedback" aria-live="polite"></div>${btn('确认答案','submit','pg-primary')}<button type="button" data-action="next-question" id="pg-next" class="pg-primary cursor-interaction" hidden>${round.index+1===round.queue.length?'查看本轮成果':'下一题，继续闯关'}</button><p class="pg-small">新题首次独立答对：＋2经验、1墨点；之后每次复习独立答对＋1经验。连对3 / 5 / 10题：额外＋1 / 2 / 5墨点，每次达成都奖励，次数不限。</p>`;finishRender('shelf');
+ main.innerHTML=`${btn('‹ 结束本轮，返回篇目','lesson','pg-link')}<div class="pg-round-top"><span class="pg-tag">第${round.index+1} / ${round.queue.length}题</span><span id="pg-streak" class="pg-tag pg-gold-tag">连对 ${round.streak}题 · 本轮最高${round.best}题</span></div><p class="pg-small">《${p.title}》· ${p.author} · ${q.kind}</p><h2>${q.kind==='补上句'?'回忆它的上一句。':q.kind==='句中填空'?'补全完整分句。':q.mode==='context'?'读懂题意，默写名句。':'让下一句，自己浮现。'}</h2><div class="${q.mode==='context'?'pg-explain':'pg-verse'}" style="white-space:pre-line">${q.kind==='补上句'?'＿＿＿＿<br>':''}${esc(q.cue)}${q.kind==='接下句'?'<br>＿＿＿＿':''}</div>${q.sourceLabel?`<p class="pg-small"><strong>${esc(q.sourceLabel)}</strong><br>${esc(q.adaptation)} · <a href="${esc(q.sourceUrl)}" target="_blank" rel="noopener noreferrer">核对试题来源</a></p>`:''}<label for="pg-answer">${q.kind==='句中填空'?'填写横线处完整分句，也可填写题干所在的完整句子':q.mode==='context'?'按空格顺序填写两部分原文，可用换行或标点分隔':'填写完整一句（含其中逗号分句），也可连同题干一起填写'}</label><textarea id="pg-answer" rows="3" placeholder="标点与空格不计入判断"></textarea>${btn('给我一点提示（会中断连对）','hint','pg-link')}<p id="pg-hint" class="pg-small"></p><div id="pg-feedback" aria-live="polite"></div>${btn('确认答案','submit','pg-primary')}<button type="button" data-action="next-question" id="pg-next" class="pg-primary cursor-interaction" hidden>${round.index+1===round.queue.length?'查看本轮成果':'下一题，继续闯关'}</button><p class="pg-small">新题首次独立答对：＋2经验、1墨点；之后每次复习独立答对＋1经验。连对3 / 5 / 10题：额外＋1 / 2 / 5墨点，每次达成都奖励，次数不限。</p>`;finishRender('shelf');
 }
 function hint(){
  if(!round||round.answered||round.hinted)return;round.hinted=true;round.streak=0;state.hint=true;const q=round.queue[round.index];
@@ -21409,7 +21434,7 @@ function finishRound(){
 }
 function restartRound(){const kind=round?.kind||'recall',owner=round?.owner;if(owner)state.current=owner;practice(kind);}
 function review(){
- const errors=[...state.mistakes.keys()].map(id=>questionMap.get(id)).filter(Boolean);
+ const errors=[...state.mistakes.keys()].map(id=>questionMap.get(id)).filter(q=>q&&!q.legacy);
  main.innerHTML=`<span class="pg-small">把薄弱处，变成下一步</span><h2>再遇这些句子，会更从容。</h2><section class="pg-hero"><p>${state.readingVerified.size}篇通过阅读检查 · ${state.done.size}题独立通过<br>累计作答${state.attempts.length}次 · 完成${state.roundCount}轮闯关</p></section>${errors.length?btn('错题连续练习 · 最多10题','review-round','pg-primary'):''}<div class="pg-section"><h3>待重练 ${errors.length}题</h3></div><div class="pg-list">${errors.map(q=>{const p=all.find(p=>p.id===q.poemId);return `<button type="button" class="pg-entry cursor-interaction" data-retry="${q.id}"><span class="pg-entry-body"><strong>${p.title} · ${q.kind}</strong><small>${esc(q.cue)}</small></span>${icon('rotate-ccw')}</button>`;}).join('')||'<p>暂时没有待重练的错题。</p>'}</div>`;finishRender('review');
 }
 function levelPage(){
