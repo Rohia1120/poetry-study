@@ -1250,6 +1250,84 @@ html,body{margin:0;min-height:100%;background:light-dark(#eef0e8,#1a201b)}
 @media(max-width:480px){#poetry-fulltext-reader{padding:0}#poetry-fulltext-reader .pg-phone{width:100%;border:0;border-radius:0;box-shadow:none;min-height:100dvh}}
 </style>
 <style>#poetry-fulltext-reader .pg-report-book{padding:14px 0;border-bottom:1px solid var(--line)}#poetry-fulltext-reader .pg-report-book summary{min-height:44px;display:list-item;align-content:center}#poetry-fulltext-reader textarea{font-size:16px;max-width:100%;width:100%}</style>
+<style>
+:root{color-scheme:light dark}
+html,body{margin:0;min-width:320px}
+#poetry-fulltext-reader{padding:24px 20px;align-items:flex-start}
+#poetry-fulltext-reader .pg-phone{width:min(100%,1280px);max-width:none;min-height:calc(100dvh - 48px);border-radius:20px;overflow:clip}
+#poetry-fulltext-reader .pg-app{display:grid;grid-template-columns:168px minmax(0,1fr);grid-template-areas:"top top" "account account" "status status" "nav main"}
+#poetry-fulltext-reader .pg-top{grid-area:top;padding:24px 32px 18px}
+#poetry-fulltext-reader .pg-account{grid-area:account;padding:10px 32px}
+#poetry-fulltext-reader #pg-save-status{grid-area:status;margin:10px 32px 0!important}
+#poetry-fulltext-reader main{grid-area:main;min-width:0;padding:30px 36px 48px;min-height:600px}
+#poetry-fulltext-reader .pg-nav{grid-area:nav;display:flex;flex-direction:column;align-self:start;position:sticky;top:20px;gap:8px;padding:24px 14px;border-top:0;border-right:1px solid var(--line)}
+#poetry-fulltext-reader .pg-nav button{flex:none;min-height:48px;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px;font-size:14px;text-align:left}
+#poetry-fulltext-reader .pg-books{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#poetry-fulltext-reader .pg-book{min-height:132px}
+#poetry-fulltext-reader .pg-reader-layout{display:grid;grid-template-columns:minmax(0,1fr) 252px;gap:30px;align-items:start}
+#poetry-fulltext-reader .pg-reader-article{min-width:0}
+#poetry-fulltext-reader .pg-reader-article h2{font-size:32px;line-height:1.5;margin:10px 0 16px}
+#poetry-fulltext-reader .pg-reader-tools{position:sticky;top:24px;display:grid;gap:18px;min-width:0}
+#poetry-fulltext-reader .pg-reading-panel{padding:20px;background:var(--soft);border-radius:16px}
+#poetry-fulltext-reader .pg-reading-panel button{width:100%;margin:10px 0 0}
+#poetry-fulltext-reader .pg-reading-panel .pg-primary{font-size:14px;padding:11px 9px}
+#poetry-fulltext-reader .pg-reading-steps{padding-left:22px;margin:12px 0}
+#poetry-fulltext-reader .pg-reading-steps li{margin:8px 0;font-size:14px;overflow-wrap:anywhere}
+#poetry-fulltext-reader .pg-full-original{font:20px/2.15 "Songti SC","SimSun",serif;padding:28px 30px;margin:22px 0;overflow-wrap:break-word;word-break:normal}
+#poetry-fulltext-reader .pg-full-original p{margin:0 0 20px;text-indent:2em}
+#poetry-fulltext-reader .pg-poetry-text p{text-align:center;text-indent:0}
+#poetry-fulltext-reader #pg-reader-end{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:16px 0 28px;padding-top:12px;border-top:1px solid var(--line)}
+#poetry-fulltext-reader .pg-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:24px 0}
+#poetry-fulltext-reader .pg-home-grid p{margin:12px 0}
+#poetry-fulltext-reader .pg-reading-question{padding:20px;margin:20px 0;border:1px solid var(--line);border-radius:16px;min-width:0}
+#poetry-fulltext-reader .pg-reading-question legend{padding:0 10px;font-size:16px}
+#poetry-fulltext-reader .pg-check-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#poetry-fulltext-reader .pg-check-options label{display:flex;align-items:center;gap:10px;padding:12px;background:var(--panel);border-radius:10px;min-height:48px;overflow-wrap:anywhere}
+#poetry-fulltext-reader .pg-check-options input{width:20px;height:20px;flex-shrink:0}
+#poetry-fulltext-reader .pg-round-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+#poetry-fulltext-reader .pg-verse{font-size:22px;line-height:1.9;overflow-wrap:anywhere}
+#poetry-fulltext-reader textarea{font-size:18px;line-height:1.7;min-height:120px;resize:vertical}
+#poetry-fulltext-reader .pg-overlay{position:fixed;inset:0;z-index:50;padding:24px;align-items:center;overflow-y:auto;overscroll-behavior:contain;backdrop-filter:blur(3px)}
+#poetry-fulltext-reader .pg-dialog{max-width:420px;padding:32px;max-height:calc(100dvh - 48px);overflow-y:auto}
+#poetry-fulltext-reader .pg-dialog-x{position:absolute;top:8px;right:8px;background:transparent;border:0;font-size:26px;min-width:44px;min-height:44px;padding:0}
+#poetry-fulltext-reader .pg-welcome-dialog h2{font-size:26px;overflow-wrap:anywhere}
+@media(min-width:1100px){#poetry-fulltext-reader .pg-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}}
+@media(max-width:1000px){
+ #poetry-fulltext-reader{padding:12px}
+ #poetry-fulltext-reader .pg-phone{min-height:calc(100dvh - 24px)}
+ #poetry-fulltext-reader .pg-app{grid-template-columns:132px minmax(0,1fr)}
+ #poetry-fulltext-reader main{padding:24px}
+ #poetry-fulltext-reader .pg-nav{padding:20px 8px}
+ #poetry-fulltext-reader .pg-nav button{font-size:13px;gap:8px;padding:10px}
+ #poetry-fulltext-reader .pg-reader-layout{grid-template-columns:minmax(0,1fr)}
+ #poetry-fulltext-reader .pg-reader-tools{position:static;grid-template-columns:repeat(2,minmax(0,1fr));grid-row:1}
+ #poetry-fulltext-reader .pg-books{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:640px){
+ #poetry-fulltext-reader{padding:0}
+ #poetry-fulltext-reader .pg-phone{width:100%;border:0;border-radius:0;min-height:100dvh;overflow:visible}
+ #poetry-fulltext-reader .pg-app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "account" "status" "nav" "main"}
+ #poetry-fulltext-reader .pg-top{padding:16px 20px}
+ #poetry-fulltext-reader .pg-account{padding:10px 20px}
+ #poetry-fulltext-reader #pg-save-status{margin:8px 20px!important}
+ #poetry-fulltext-reader main{padding:22px 16px 36px;min-height:500px}
+ #poetry-fulltext-reader .pg-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:sticky;top:0;padding:6px;background:var(--paper);border:0;border-bottom:1px solid var(--line);z-index:3;gap:3px}
+ #poetry-fulltext-reader .pg-nav button{flex-direction:column;justify-content:center;gap:3px;padding:6px 2px;font-size:11px;line-height:1.3;min-width:0}
+ #poetry-fulltext-reader .pg-reader-layout{gap:18px}
+ #poetry-fulltext-reader .pg-reader-tools{gap:10px}
+ #poetry-fulltext-reader .pg-reading-panel{padding:14px 12px}
+ #poetry-fulltext-reader .pg-reading-panel h3{font-size:15px}
+ #poetry-fulltext-reader .pg-reading-panel .pg-small{font-size:12px}
+ #poetry-fulltext-reader .pg-reading-steps li{font-size:12px}
+ #poetry-fulltext-reader .pg-full-original{padding:22px 16px;font-size:19px;line-height:2.1}
+ #poetry-fulltext-reader .pg-reader-article h2{font-size:28px}
+ #poetry-fulltext-reader .pg-home-grid{grid-template-columns:minmax(0,1fr)}
+ #poetry-fulltext-reader .pg-dialog{padding:30px 22px 24px}
+ #poetry-fulltext-reader .pg-verse{font-size:20px}
+}
+@media(max-width:380px){#poetry-fulltext-reader .pg-reader-tools{grid-template-columns:minmax(0,1fr)}#poetry-fulltext-reader .pg-check-options{grid-template-columns:minmax(0,1fr)}}
+
+</style>
 </head>
 <body>
 <script>/**
@@ -20988,7 +21066,30 @@ const books=[
 ];
 const all=[];books.forEach((b,bi)=>b.items=b.items.map((d,j)=>{const p={id:`${bi}-${j}`,bi,title:d[0],author:d[1],a:d[2],b:d[3],meaning:d[4]};all.push(p);return p;}));
 const readerData=JSON.parse(document.getElementById('pg-reader-data').textContent);all.forEach(p=>Object.assign(p,readerData.find(r=>r.id===p.id)));
-const state={xp:0,ink:0,name:'诗境旅人',goal:2,motion:true,appearance:'system',title:'auto',owned:new Set(),equipped:{avatar:'default',frame:'default',theme:'default'},ledger:[],levelNotice:'',read:new Set(),earned:new Set(),done:new Set(),bookmarks:new Set(),mistakes:new Map(),attempts:[],view:'profile',book:0,current:'0-10',filter:'全部',hint:false,checked:false,mode:'recall',draft:''};
+const normalizeAnswer=s=>String(s).normalize('NFKC').replace(/[\p{P}\p{Z}\s]/gu,'');
+const questionBank=[],questionMap=new Map();
+const addQuestion=q=>{if(!questionMap.has(q.id)){questionBank.push(q);questionMap.set(q.id,q);}};
+for(const p of all){
+ p.units=p.paragraphs.flatMap(text=>text.split(/[，。！？；：]/u)).map(text=>text.trim().replace(/^[“”‘’「」『』]+|[“”‘’「」『』]+$/gu,''))
+  .filter(text=>normalizeAnswer(text).length>=4&&normalizeAnswer(text).length<=90);
+ addQuestion({id:p.id+'-recall',poemId:p.id,mode:'recall',kind:'接下句',cue:p.a,answer:p.b});
+ addQuestion({id:p.id+'-context',poemId:p.id,mode:'context',kind:'情境默写',cue:p.meaning,answer:p.a+'，'+p.b});
+ p.units.forEach((unit,i)=>{
+  if(i>0)addQuestion({id:p.id+'-next-'+i,poemId:p.id,mode:'recall',kind:'接下句',cue:p.units[i-1],answer:unit});
+  if(i<p.units.length-1)addQuestion({id:p.id+'-prev-'+i,poemId:p.id,mode:'recall',kind:'补上句',cue:p.units[i+1],answer:unit});
+  const chunks=[...unit.matchAll(/[\p{Script=Han}A-Za-z0-9]{2,}/gu)];
+  if(chunks.length){
+   const middle=unit.length/2,chunk=chunks.sort((a,b)=>Math.abs(a.index+a[0].length/2-middle)-Math.abs(b.index+b[0].length/2-middle))[0];
+   const size=Math.min(chunk[0].length,normalizeAnswer(unit).length>12?4:2),start=chunk.index+Math.floor((chunk[0].length-size)/2),answer=unit.slice(start,start+size);
+   addQuestion({id:p.id+'-cloze-'+i,poemId:p.id,mode:'recall',kind:'句中填空',cue:unit.slice(0,start)+'＿＿'+unit.slice(start+size),answer,original:unit,unit:i});
+  }
+ });
+ p.questions=questionBank.filter(q=>q.poemId===p.id&&q.mode==='recall');
+}
+const shuffle=list=>{const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const poemQuestionCount=id=>questionBank.filter(q=>q.poemId===id).length;
+
+const state={xp:0,ink:0,name:'诗境旅人',goal:2,motion:true,appearance:'system',title:'auto',owned:new Set(),equipped:{avatar:'default',frame:'default',theme:'default'},ledger:[],levelNotice:'',read:new Set(),earned:new Set(),done:new Set(),bookmarks:new Set(),mistakes:new Map(),attempts:[],view:'profile',book:0,current:'0-10',filter:'全部',hint:false,checked:false,mode:'recall',draft:'',readingVerified:new Set(),readingProgress:{},streakRewards:new Set(),roundRewards:new Set(),bestStreak:0,roundCount:0};
 const levels=[{xp:0,name:'初入诗境',benefit:'开启旅程，领取启程礼'},{xp:40,name:'书卷旅人',benefit:'解锁「书卷旅人」称号'},{xp:100,name:'诗境行者',benefit:'解锁「诗境行者」称号'},{xp:200,name:'风雅学士',benefit:'解锁「风雅学士」称号'},{xp:400,name:'山河知音',benefit:'解锁「山河知音」称号'}];
 const goods=[{id:'bamboo',type:'avatar',name:'青竹头像',price:3,mark:'竹',desc:'把个人头像换成一枚青竹字印。'},{id:'gold',type:'frame',name:'金叶书签边框',price:5,mark:'叶',desc:'为已收藏的诗句书签添一道金色边框。'},{id:'moon',type:'theme',name:'月白主题',price:10,mark:'月',desc:'整套界面换上清淡的月白与青灰色。'}];
 const levelIndex=()=>levels.reduce((n,l,i)=>state.xp>=l.xp?i:n,0);
@@ -21008,7 +21109,7 @@ function loadProgress(){
   const payload=JSON.parse(raw);
   if(!payload||payload.version!==1||!payload.state||typeof payload.state!=='object')throw new Error('unsupported record');
   const s=payload.state,ids=new Set(all.map(p=>p.id));
-  const validKey=k=>typeof k==='string'&&all.some(p=>k===p.id+'-recall'||k===p.id+'-context');
+  const validKey=k=>typeof k==='string'&&questionMap.has(k);
   const list=(v,check)=>Array.isArray(v)?v.filter(check):[];
   for(const k of ['xp','ink'])if(Number.isSafeInteger(s[k])&&s[k]>=0)state[k]=s[k];
   if(typeof s.name==='string'&&s.name.trim())state.name=s.name.trim().slice(0,12);
@@ -21026,10 +21127,15 @@ function loadProgress(){
   state.bookmarks=new Set(list(s.bookmarks,id=>ids.has(id)));
   state.earned=new Set(list(s.earned,k=>k==='welcome'||validKey(k)||(typeof k==='string'&&k.endsWith('-read')&&ids.has(k.slice(0,-5)))));
   const validQuestion=q=>q&&ids.has(q.id)&&['recall','context'].includes(q.mode);
-  state.mistakes=new Map(list(s.mistakes,p=>Array.isArray(p)&&validQuestion(p[1])&&p[0]===p[1].id+'-'+p[1].mode).map(([k,q])=>[k,{id:q.id,mode:q.mode}]));
-  state.attempts=list(s.attempts,q=>validQuestion(q)&&typeof q.ok==='boolean'&&typeof q.hint==='boolean').map(q=>({id:q.id,mode:q.mode,ok:q.ok,hint:q.hint}));
+  state.mistakes=new Map(list(s.mistakes,p=>Array.isArray(p)&&validQuestion(p[1])&&questionMap.get(p[0])?.poemId===p[1].id).map(([k,q])=>[k,{id:q.id,mode:q.mode,qid:k}]));
+  state.attempts=list(s.attempts,q=>validQuestion(q)&&typeof q.ok==='boolean'&&typeof q.hint==='boolean').map(q=>({id:q.id,mode:q.mode,ok:q.ok,hint:q.hint,...(questionMap.has(q.qid)?{qid:q.qid}:{})}));
   state.ledger=list(s.ledger,x=>x&&typeof x.label==='string'&&Number.isSafeInteger(x.amount)).map(x=>({label:x.label.slice(0,100),amount:x.amount}));
   if(typeof s.reportId==='string'&&/^[a-zA-Z0-9-]{8,80}$/.test(s.reportId))state.reportId=s.reportId;
+  state.readingVerified=new Set(list(s.readingVerified,id=>ids.has(id)));
+  for(const [id,r] of Object.entries(s.readingProgress||{})){if(ids.has(id)&&r&&typeof r.ms==='number'&&Number.isFinite(r.ms)&&r.ms>=0)state.readingProgress[id]={ms:Math.min(r.ms,180000),bottom:r.bottom===true};}
+  state.streakRewards=new Set(list(s.streakRewards,k=>typeof k==='string'&&/^\d{4}-\d{2}-\d{2}:(3|5|10)$/.test(k)));
+  state.roundRewards=new Set(list(s.roundRewards,k=>k==='mixed-context'||all.some(p=>k===p.id+':recall')));
+  for(const k of ['bestStreak','roundCount'])if(Number.isSafeInteger(s[k])&&s[k]>=0)state[k]=s[k];
   if(ids.has(s.current))state.current=s.current;
   if(Number.isInteger(s.book)&&s.book>=0&&s.book<books.length)state.book=s.book;
  }catch(error){
@@ -21040,8 +21146,8 @@ function saveProgress(){
  if(storageLocked){storageStatus(storageIssue);return false;}
  try{
   const saved={};
-  for(const k of ['reportId','xp','ink','name','goal','motion','appearance','title','equipped','ledger','attempts','current','book'])saved[k]=state[k];
-  for(const k of ['owned','read','earned','done','bookmarks'])saved[k]=[...state[k]];
+  for(const k of ['reportId','xp','ink','name','goal','motion','appearance','title','equipped','ledger','attempts','current','book','readingProgress','bestStreak','roundCount'])saved[k]=state[k];
+  for(const k of ['owned','read','earned','done','bookmarks','readingVerified','streakRewards','roundRewards'])saved[k]=[...state[k]];
   saved.mistakes=[...state.mistakes];
   const value=JSON.stringify({version:1,state:saved});
   if(value!==lastSaved){globalThis.localStorage.setItem(SAVE_KEY,value);lastSaved=value;}
@@ -21053,15 +21159,16 @@ function saveProgress(){
 }
 loadProgress();
 globalThis.addEventListener('pagehide',saveProgress);
+globalThis.addEventListener('pageshow',event=>{if(event.persisted)welcomeBack();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveProgress();});
 
-const completed=id=>Number(state.done.has(id+'-recall'))+Number(state.done.has(id+'-context'));
+const completed=id=>[...state.done].filter(k=>questionMap.get(k)?.poemId===id).length;
 function status(p){const n=completed(p.id);return n===2?'片段两关已完成 · 待复测':n?'片段闯关 1 / 2':state.read.has(p.id)?'已阅读 · 待闯关':'尚未开始';}
 function header(){ $('#pg-xp').textContent=`${state.xp} 经验 · ${state.ink} 墨点`;$('#pg-rank').textContent=state.title==='auto'?levels[levelIndex()].name:state.title;}
 function finishRender(nav){saveProgress();state.view=nav;root.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.nav===nav)));header();if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});}
 function btn(label,action,cls=''){return `<button type="button" data-action="${action}" class="cursor-interaction ${cls}">${label}</button>`;}
 function hero(p){const b=books[p.bi];return `<section class="pg-hero"><i data-lucide="${b.icon}" class="pg-scene" aria-hidden="true"></i><span class="pg-small">${b.name} · ${b.scene}</span><h2>${p.title}</h2><span class="pg-small">${p.author} · 今日先记住一个片段</span></section>`;}
-function home(){const p=get();main.innerHTML=`<span class="pg-small">每记住一句，就走近一处风景</span><h2>今天，也向诗里走一步。</h2>${hero(p)}${btn('继续这一程','lesson','pg-primary')}<div class="pg-section"><h3>这一程的小目标</h3><span class="pg-small">首次完成可获得</span></div><div class="pg-tasks"><div class="pg-task"><span>${icon('book-open')}</span><div><p>读懂这个片段</p><span class="pg-small">先看原句，再理解意思</span></div><span class="pg-gain">+5 经验</span></div><div class="pg-task"><span>${icon('pen-line')}</span><div><p>独立写出下一句</p><span class="pg-small">不借助提示完成回忆</span></div><span class="pg-gain">+10 经验</span></div><div class="pg-task"><span>${icon('sparkles')}</span><div><p>根据情境找原句</p><span class="pg-small">把意思与句子联系起来</span></div><span class="pg-gain">+10 经验</span></div></div><p class="pg-small" style="margin-top:18px">练完两关，收藏一枚对应诗句书签。</p>`;finishRender('home');}
+function home(){const p=get();main.innerHTML=`<span class="pg-small">每记住一句，就走近一处风景</span><h2>今天，也向诗里走一步。</h2>${hero(p)}${btn('继续这一程','lesson','pg-primary')}<div class="pg-section"><h3>这一程的小目标</h3><span class="pg-small">首次完成可获得</span></div><div class="pg-tasks"><div class="pg-task"><span>${icon('book-open')}</span><div><p>读懂这个片段</p><span class="pg-small">先看原句，再理解意思</span></div><span class="pg-gain">+5 经验</span></div><div class="pg-task"><span>${icon('pen-line')}</span><div><p>独立写出下一句</p><span class="pg-small">不借助提示完成回忆</span></div><span class="pg-gain">+10 经验</span></div><div class="pg-task"><span>${icon('sparkles')}</span><div><p>根据情境找原句</p><span class="pg-small">把意思与句子联系起来</span></div><span class="pg-gain">+10 经验</span></div></div><p class="pg-small" style="margin-top:18px">完成高分闯关，收藏一枚对应诗句书签。</p>`;finishRender('home');}
 function shelf(){main.innerHTML=`<span class="pg-small">按教材分册 · 古诗文选录</span><h2>把山河，收进书架。</h2><p class="pg-small">先选一册，再点进篇目阅读全文。</p><div class="pg-books">${books.map((b,i)=>{const n=b.items.filter(p=>completed(p.id)===2).length;return `<button type="button" class="pg-book cursor-interaction" data-book="${i}"><span class="pg-cover">${b.short}<span>${b.type==='必修'?'必修':'选择性必修'}</span></span><span class="pg-book-text"><strong>${b.name}</strong><small>${b.scene} · ${b.items.length} 篇选录</small><small>${n} 个片段完成两关</small><span class="pg-progress" aria-hidden="true"><span style="width:${100*n/b.items.length}%"></span></span></span>${icon('chevron-right')}</button>`;}).join('')}</div><p class="pg-small" style="margin-top:18px">已补入当前53篇选录作品的完整文本；节选篇目按课文选入范围呈现。</p>`;finishRender('shelf');}
 function book(index,reset=true){state.book=index;if(reset)state.filter='全部';const b=books[index],items=b.items.filter(p=>state.filter==='全部'||(state.filter==='未开始'&&!state.read.has(p.id))||(state.filter==='练习中'&&state.read.has(p.id)&&completed(p.id)<2)||(state.filter==='片段通关'&&completed(p.id)===2));main.innerHTML=`${btn('‹ 返回书架','shelf','pg-link')}<span class="pg-small" style="display:block">语文 · 古诗文选录</span><h2>${b.name}</h2><span class="pg-small">${b.items.length} 篇选录 · ${b.scene}</span><div class="pg-filters" aria-label="篇目进度">${['全部','未开始','练习中','片段通关'].map(t=>`<button type="button" data-filter="${t}" aria-pressed="${state.filter===t}" class="cursor-interaction">${t}</button>`).join('')}</div><div class="pg-list">${items.map(p=>`<button type="button" class="pg-entry cursor-interaction" data-poem="${p.id}"><span class="pg-entry-num">${String(b.items.indexOf(p)+1).padStart(2,'0')}</span><span class="pg-entry-body"><strong>${p.title}</strong><small>${p.author} · ${status(p)}</small></span>${icon(completed(p.id)===2?'bookmark-check':'chevron-right')}</button>`).join('')||'<p class="pg-small">这一分类还没有篇目，可以切换查看。</p>'}</div>`;finishRender('shelf');}
 function lesson(id){if(id)state.current=id;const p=get();main.innerHTML=`${btn('‹ 返回本册篇目','book','pg-link')}<span class="pg-small" style="display:block">${books[p.bi].name} · ${p.author}</span><h2>${p.title}</h2><span class="pg-tag">片段学习</span> <span class="pg-tag pg-gold-tag">${status(p)}</span><div class="pg-verse">${p.a}，<br>${p.b}。</div><h3>先读懂这一层意思</h3><div class="pg-explain">${p.meaning}</div>${btn(state.read.has(p.id)?'已领取阅读经验 · 再读一遍':'我读完了，收下阅读奖励','read','pg-primary')}<div class="pg-section"><h3>进入片段挑战</h3><span class="pg-small">首次独立答对各 +10</span></div><div class="pg-grid">${btn('第一关 · 默写接句','recall')}${btn('第二关 · 情境寻句','context')}</div><p class="pg-small">阅读打卡不判定背会；两关都独立答对，可领取诗句书签。全篇掌握还需要完整背诵与后续复测。</p>`;finishRender('shelf');}
@@ -21084,7 +21191,7 @@ function submit(){const p=get(),isContext=state.mode==='context',input=$('#pg-an
  if(ok&&!state.hint&&(gain||badge))popup(badge?'恭喜，收下一枚诗句！':'这一句，写得漂亮。',badge?'这个片段的默写与情境两关，都已独立完成。':'你没有借助提示，成功找回了这句原文。',gain,badge);
 }
 function review(){const errors=[...state.mistakes.values()];main.innerHTML=`<span class="pg-small">把薄弱处，变成下一步</span><h2>温故，也是一段旅程。</h2><section class="pg-hero"><h3>累计学习足迹</h3><p>${state.read.size} 个片段已阅读 · ${state.done.size} 个关卡独立通过</p><span class="pg-small">${state.attempts.length} 次作答记录 · 已保存在本机</span></section><div class="pg-section"><h3>需要再练 ${errors.length} 题</h3></div>${errors.length?`<div class="pg-list">${errors.map(m=>{const p=all.find(x=>x.id===m.id);return `<button type="button" class="pg-entry cursor-interaction" data-retry="${m.id}|${m.mode}"><span class="pg-entry-body"><strong>${p.title}</strong><small>${m.mode==='context'?'情境寻句':'默写接句'} · 再试一次</small></span>${icon('rotate-ccw')}</button>`;}).join('')}</div>`:'<p class="pg-small">暂时没有待重练的错题。练习中写错的题会留在这里。</p>'}<div class="pg-section"><h3>是否已经记牢？</h3></div><p class="pg-small">当前记录说明本次练习表现。隔日复测和完整篇目检测，将用于后续确认长期掌握。</p>`;finishRender('review');}
-function collection(){const unlocked=all.filter(p=>state.bookmarks.has(p.id));main.innerHTML=`<span class="pg-small">把努力，留成看得见的纪念</span><h2>你的诗境收藏。</h2><section class="pg-hero"><i data-lucide="award" class="pg-scene" aria-hidden="true"></i><h3>${levels[levelIndex()].name}</h3><p>已积累 ${state.xp} 经验</p><span class="pg-small">40 经验成为书卷旅人 · 100 经验成为诗境行者</span></section><div class="pg-section"><h3>诗句书签</h3><span class="pg-small">已收藏 ${unlocked.length} 枚</span></div><div class="pg-reward-grid">${unlocked.map(p=>`<div class="pg-bookmark">${icon('bookmark-check')}<p>${p.b}</p><span class="pg-small">${p.title}</span></div>`).join('')}${unlocked.length?'':`<div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>第一枚诗句</p><span class="pg-small">完成任一片段的两关</span></div><div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>再遇山河</p><span class="pg-small">继续探索其他篇目</span></div>`}</div><p class="pg-small">同一项首次完成奖励只领取一次。阅读、答题与收藏分别记录，书签不代表全篇已掌握。</p>`;finishRender('collection');}
+function collection(){const unlocked=all.filter(p=>state.bookmarks.has(p.id));main.innerHTML=`<span class="pg-small">把努力，留成看得见的纪念</span><h2>你的诗境收藏。</h2><section class="pg-hero"><i data-lucide="award" class="pg-scene" aria-hidden="true"></i><h3>${levels[levelIndex()].name}</h3><p>已积累 ${state.xp} 经验</p><span class="pg-small">40 经验成为书卷旅人 · 100 经验成为诗境行者</span></section><div class="pg-section"><h3>诗句书签</h3><span class="pg-small">已收藏 ${unlocked.length} 枚</span></div><div class="pg-reward-grid">${unlocked.map(p=>`<div class="pg-bookmark">${icon('bookmark-check')}<p>${p.b}</p><span class="pg-small">${p.title}</span></div>`).join('')}${unlocked.length?'':`<div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>第一枚诗句</p><span class="pg-small">任一篇目10题中独立答对至少8题</span></div><div class="pg-bookmark pg-locked">${icon('lock-keyhole')}<p>再遇山河</p><span class="pg-small">继续探索其他篇目</span></div>`}</div><p class="pg-small">同一道题的首次奖励只领取一次。阅读、答题与收藏分别记录，书签不代表全篇已掌握。</p>`;finishRender('collection');}
 function profile(){
  const li=levelIndex(),lv=levels[li],next=levels[li+1],progress=next?Math.min(100,100*(state.xp-lv.xp)/(next.xp-lv.xp)):100;
  main.innerHTML=`<div class="pg-profile-head"><div class="pg-avatar" aria-label="个人头像">${state.equipped.avatar==='bamboo'?'竹':'初'}</div><div><h2>${esc(state.name)}</h2><span class="pg-tag">Lv.${li+1} · ${esc(state.title==='auto'?lv.name:state.title)}</span></div></div><section class="pg-level-card"><div class="pg-level-top"><strong>${lv.name}</strong><span class="pg-small">${state.xp} 总经验</span></div><div class="pg-level-track" role="progressbar" aria-label="当前等级升级进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div><span class="pg-small">${next?`再获得 ${next.xp-state.xp} 经验，成为${next.name}`:'已抵达当前最高等级，仍可继续积累经验'}</span></section><p class="pg-small">本次学习目标：独立通过 ${Math.min(state.done.size,state.goal)} / ${state.goal} 关${state.done.size>=state.goal?' · 已达成':''}</p><div class="pg-wallet"><button type="button" class="cursor-interaction" data-action="shop"><span class="pg-small">我的墨点</span><strong>${state.ink}</strong><span class="pg-small">去兑换心仪装扮 ›</span></button><button type="button" class="cursor-interaction" data-action="collection"><span class="pg-small">诗句书签</span><strong>${state.bookmarks.size}</strong><span class="pg-small">查看学习纪念 ›</span></button></div>${!state.earned.has('welcome')?btn('领取启程礼 · 3 墨点','welcome','pg-primary'):''}<div class="pg-menu">${btn(`${icon('send')}<span>生成学习报告<small style="display:block">复制后通过微信发给老师</small></span>${icon('chevron-right')}`,'share-report')}${btn(`${icon('graduation-cap')}<span>老师端<small style="display:block">粘贴报告，查看学生进度与错题</small></span>${icon('chevron-right')}`,'teacher')}${btn(`${icon('milestone')}<span>成长等级<small style="display:block">查看经验门槛与称号</small></span>${icon('chevron-right')}`,'levels')}${btn(`${icon('store')}<span>诗境小铺<small style="display:block">头像、书签边框与主题</small></span>${icon('chevron-right')}`,'shop')}${btn(`${icon('package-open')}<span>我的装扮<small style="display:block">已拥有 ${state.owned.size} 件 · 可随时换用</small></span>${icon('chevron-right')}`,'inventory')}${btn(`${icon('settings-2')}<span>个人设置<small style="display:block">昵称、目标、称号与庆祝动效</small></span>${icon('chevron-right')}`,'settings')}</div><p class="pg-small">经验记录成长，墨点用于兑换，书签保留为纪念。进度与设置自动保存在本机，关闭页面后仍可继续。</p>`;
@@ -21104,31 +21211,31 @@ function saveSettings(){const name=$('#pg-name').value.trim();if(!name){$('#pg-s
 function lesson(id){if(id)state.current=id;const p=get();main.innerHTML=`${btn('‹ 返回本册篇目','book','pg-link')}<span class="pg-small" style="display:block">${books[p.bi].name} · ${p.author}</span><h2>${esc(p.title)}</h2><span class="pg-tag">${p.scope}</span><div class="pg-full-original">${p.paragraphs.map(t=>`<p>${esc(t)}</p>`).join('')}</div>${btn(state.read.has(p.id)?'已阅读本篇 · 再读一遍':'我已阅读本篇 · 领取阅读奖励','read','pg-primary')}<div class="pg-section"><h3>原有片段练习</h3></div><div class="pg-grid">${btn('默写接句','recall')}${btn('情境寻句','context')}</div><details><summary class="cursor-interaction pg-small">原文版本与资料来源</summary><p class="pg-small">教材选入的是节选时，此处展示该节选文本；不同版本的字形与节选范围请与所用教材核对。</p><a class="pg-reader-source" href="${p.source}" target="_blank" rel="noopener noreferrer">查看校读资料</a></details>`;finishRender('shelf');}
 const TEACHER_KEY='poetry-study:teacher-reports:v1';
 let teacherIssue='';
-function reportKey(k){return typeof k==='string'&&all.some(p=>k===p.id+'-recall'||k===p.id+'-context');}
+function reportKey(k){return typeof k==='string'&&questionMap.has(k);}
 function checkReport(r){
  const ids=new Set(all.map(p=>p.id)),integer=n=>Number.isSafeInteger(n)&&n>=0&&n<=1000000;
  if(!r||r.version!==1||typeof r.id!=='string'||!/^[a-zA-Z0-9-]{8,80}$/.test(r.id)||typeof r.name!=='string'||!r.name.trim()||r.name.length>12||!Number.isFinite(Date.parse(r.generatedAt))||!integer(r.xp)||!integer(r.tries)||!integer(r.independent)||!integer(r.correct)||r.independent>r.tries||r.correct>r.independent)throw Error('报告格式不正确，请让学生重新生成并复制完整报告。');
- for(const [key,check,max]of [['read',v=>ids.has(v),all.length],['done',reportKey,all.length*2],['mistakes',reportKey,all.length*2]]){
+ for(const [key,check,max]of [['read',v=>ids.has(v),all.length],['done',reportKey,questionBank.length],['mistakes',reportKey,questionBank.length]]){
   if(!Array.isArray(r[key])||r[key].length>max||r[key].some(v=>!check(v)))throw Error('报告中的篇目无法识别，请使用同一版本的网站。');
  }
- return {version:1,id:r.id,name:r.name.trim(),generatedAt:new Date(r.generatedAt).toISOString(),xp:r.xp,tries:r.tries,independent:r.independent,correct:r.correct,read:[...new Set(r.read)],done:[...new Set(r.done)],mistakes:[...new Set(r.mistakes)]};
+ return {version:1,readingStandard:r.readingStandard==='checks-v1'?'checks-v1':'legacy',id:r.id,name:r.name.trim(),generatedAt:new Date(r.generatedAt).toISOString(),xp:r.xp,tries:r.tries,independent:r.independent,correct:r.correct,read:[...new Set(r.read)],done:[...new Set(r.done)],mistakes:[...new Set(r.mistakes)]};
 }
 function makeReport(){
  if(!state.reportId)state.reportId=globalThis.crypto?.randomUUID?.()||('student-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
  saveProgress();
- return checkReport({version:1,id:state.reportId,name:state.name,generatedAt:new Date().toISOString(),xp:state.xp,read:[...state.read],done:[...state.done],mistakes:[...state.mistakes.keys()],tries:state.attempts.length,independent:state.attempts.filter(x=>!x.hint).length,correct:state.attempts.filter(x=>!x.hint&&x.ok).length});
+ return checkReport({version:1,id:state.reportId,name:state.name,generatedAt:new Date().toISOString(),xp:state.xp,read:[...state.readingVerified],readingStandard:'checks-v1',done:[...state.done],mistakes:[...state.mistakes.keys()],tries:state.attempts.length,independent:state.attempts.filter(x=>!x.hint).length,correct:state.attempts.filter(x=>!x.hint&&x.ok).length});
 }
 function reportCode(r){return 'SJ1.'+btoa(encodeURIComponent(JSON.stringify(r)));}
 function parseReport(text){
- if(typeof text!=='string'||text.length>30000)throw Error('请粘贴完整的一份学习报告。');
+ if(typeof text!=='string'||text.length>500000)throw Error('请粘贴完整的一份学习报告。');
  const code=text.match(/SJ1\.([A-Za-z0-9+/=]+)/);if(!code)throw Error('没有找到报告码，请复制包含 SJ1. 开头代码的完整报告。');
  try{return checkReport(JSON.parse(decodeURIComponent(atob(code[1]))));}catch(e){throw Error('报告码不完整或格式错误，请让学生重新复制。');}
 }
 function reportDate(r){return new Date(r.generatedAt).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});}
-function reportSummary(r){return `<section class="pg-hero"><h3>${esc(r.name)}的学习进度</h3><p>已阅读 ${r.read.length} / ${all.length} 篇<br>片段独立通关 ${r.done.length} / ${all.length*2} 关<br>待重练 ${r.mistakes.length} 题 · 累计 ${r.xp} 经验</p><span class="pg-small">累计作答 ${r.tries} 次 · 独立作答正确率 ${r.independent?Math.round(100*r.correct/r.independent)+'%':'暂无'}<br>报告生成：${reportDate(r)}</span></section>`;}
+function reportSummary(r){return `<section class="pg-hero"><h3>${esc(r.name)}的学习进度</h3><p>${r.readingStandard==='checks-v1'?'通过阅读检查':'旧版阅读打卡'} ${r.read.length} / ${all.length} 篇<br>片段独立通关 ${r.done.length} / ${questionBank.length} 关<br>待重练 ${r.mistakes.length} 题 · 累计 ${r.xp} 经验</p><span class="pg-small">累计作答 ${r.tries} 次 · 独立作答正确率 ${r.independent?Math.round(100*r.correct/r.independent)+'%':'暂无'}<br>报告生成：${reportDate(r)}</span></section>`;}
 function shareReport(){
  const r=makeReport();
- const text=`诗境学习报告｜${r.name}\n已阅读 ${r.read.length}/${all.length} 篇，片段独立通关 ${r.done.length}/${all.length*2} 关，待重练 ${r.mistakes.length} 题。\n报告生成：${reportDate(r)}\n老师在网站「我的 → 老师端」粘贴此消息即可查看。\n${reportCode(r)}`;
+ const text=`诗境学习报告｜${r.name}\n已阅读 ${r.read.length}/${all.length} 篇，片段独立通关 ${r.done.length}/${questionBank.length} 关，待重练 ${r.mistakes.length} 题。\n报告生成：${reportDate(r)}\n老师在网站「我的 → 老师端」粘贴此消息即可查看。\n${reportCode(r)}`;
  main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>把努力，分享给老师。</h2>${reportSummary(r)}<p class="pg-small">先在个人设置填好自己的昵称。点下方复制，再通过微信发送给老师。</p><label for="pg-report-output">学习报告</label><textarea id="pg-report-output" readonly rows="5" style="overflow-wrap:anywhere"></textarea>${btn('复制报告，发给老师','copy-report','pg-primary')}<p id="pg-report-feedback" class="pg-small" aria-live="polite"></p><p class="pg-small">报告只包含昵称与学习统计，不包含个人设置。报告记录生成时的进度；继续学习后请重新生成。</p>`;
  $('#pg-report-output').value=text;finishRender('profile');
 }
@@ -21144,7 +21251,7 @@ function savedReports(){
 }
 function teacher(){
  const rows=savedReports().sort((a,b)=>Date.parse(b.generatedAt)-Date.parse(a.generatedAt));
- main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<span class="pg-small">简易老师端 · 报告查看</span><h2>看看学生走到了哪里。</h2><p class="pg-small">让学生进入「我的 → 生成学习报告」复制发给你。粘贴整条消息即可查看，不需要注册。</p><label for="pg-report-input">粘贴学生发来的学习报告</label><textarea id="pg-report-input" rows="4" maxlength="30000" placeholder="包含 SJ1. 开头报告码的完整消息"></textarea>${btn('导入并查看进度','import-report','pg-primary')}<p id="pg-import-feedback" aria-live="polite" class="pg-small">${esc(teacherIssue)}</p><div class="pg-section"><h3>已收到的学生报告</h3><span class="pg-small">${rows.length} 份</span></div>${rows.length?`<div class="pg-list">${rows.map(r=>`<button type="button" class="pg-entry cursor-interaction" data-report="${r.id}"><span class="pg-entry-body"><strong>${esc(r.name)}</strong><small>已读 ${r.read.length} 篇 · 片段通关 ${r.done.length} 关 · 待重练 ${r.mistakes.length} 题</small><small>生成于 ${reportDate(r)}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`:'<p class="pg-small">还没有报告。导入第一份后，就能看到学生进度。</p>'}<p class="pg-small">这里显示学生主动发送的报告，不会实时更新。导入记录保存在当前浏览器；不会改变你自己的学习进度。</p>`;finishRender('profile');
+ main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<span class="pg-small">简易老师端 · 报告查看</span><h2>看看学生走到了哪里。</h2><p class="pg-small">让学生进入「我的 → 生成学习报告」复制发给你。粘贴整条消息即可查看，不需要注册。</p><label for="pg-report-input">粘贴学生发来的学习报告</label><textarea id="pg-report-input" rows="4" maxlength="500000" placeholder="包含 SJ1. 开头报告码的完整消息"></textarea>${btn('导入并查看进度','import-report','pg-primary')}<p id="pg-import-feedback" aria-live="polite" class="pg-small">${esc(teacherIssue)}</p><div class="pg-section"><h3>已收到的学生报告</h3><span class="pg-small">${rows.length} 份</span></div>${rows.length?`<div class="pg-list">${rows.map(r=>`<button type="button" class="pg-entry cursor-interaction" data-report="${r.id}"><span class="pg-entry-body"><strong>${esc(r.name)}</strong><small>已读 ${r.read.length} 篇 · 片段通关 ${r.done.length} 关 · 待重练 ${r.mistakes.length} 题</small><small>生成于 ${reportDate(r)}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`:'<p class="pg-small">还没有报告。导入第一份后，就能看到学生进度。</p>'}<p class="pg-small">这里显示学生主动发送的报告，不会实时更新。导入记录保存在当前浏览器；不会改变你自己的学习进度。</p>`;finishRender('profile');
 }
 function importReport(){
  const feedback=$('#pg-import-feedback');
@@ -21161,7 +21268,175 @@ function importReport(){
 }
 function teacherDetail(id){
  const r=savedReports().find(x=>x.id===id);if(!r){teacher();return;}
- main.innerHTML=`${btn('‹ 返回老师端','teacher','pg-link')}<h2>${esc(r.name)}的报告。</h2>${reportSummary(r)}<div class="pg-section"><h3>需要再练的题目</h3></div>${r.mistakes.length?`<div class="pg-list">${r.mistakes.map(k=>{const p=all.find(p=>k===p.id+'-recall'||k===p.id+'-context');return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${k.endsWith('-context')?'情境寻句':'默写接句'}</small></span></div>`;}).join('')}</div>`:'<p class="pg-small">报告中没有待重练题目。</p>'}<div class="pg-section"><h3>按教材查看篇目进度</h3></div>${books.map(b=>`<details class="pg-report-book"><summary class="cursor-interaction">${b.name} · 已读 ${b.items.filter(p=>r.read.includes(p.id)).length}/${b.items.length} 篇</summary>${b.items.map(p=>{const n=Number(r.done.includes(p.id+'-recall'))+Number(r.done.includes(p.id+'-context'));return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${r.read.includes(p.id)?'已阅读':'未打卡'} · 片段独立通关 ${n}/2</small></span></div>`;}).join('')}</details>`).join('')}<p class="pg-small">这是一份学生设备生成的学习记录，反映阅读打卡和片段练习表现，不能据此认定全篇已经背会。更新进度时，请学生重新发报告。</p>`;finishRender('profile');
+ main.innerHTML=`${btn('‹ 返回老师端','teacher','pg-link')}<h2>${esc(r.name)}的报告。</h2>${reportSummary(r)}<div class="pg-section"><h3>需要再练的题目</h3></div>${r.mistakes.length?`<div class="pg-list">${r.mistakes.map(k=>{const p=all.find(p=>p.id===questionMap.get(k)?.poemId);return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${questionMap.get(k)?.kind||'默写练习'}</small></span></div>`;}).join('')}</div>`:'<p class="pg-small">报告中没有待重练题目。</p>'}<div class="pg-section"><h3>按教材查看篇目进度</h3></div>${books.map(b=>`<details class="pg-report-book"><summary class="cursor-interaction">${b.name} · 已读 ${b.items.filter(p=>r.read.includes(p.id)).length}/${b.items.length} 篇</summary>${b.items.map(p=>{const n=r.done.filter(k=>questionMap.get(k)?.poemId===p.id).length;return `<div class="pg-entry"><span class="pg-entry-body"><strong>${p.title}</strong><small>${r.read.includes(p.id)?'已阅读':'未打卡'} · 独立通过 ${n}/${poemQuestionCount(p.id)}题</small></span></div>`;}).join('')}</details>`).join('')}<p class="pg-small">这是一份学生设备生成的学习记录，反映阅读打卡和片段练习表现，不能据此认定全篇已经背会。更新进度时，请学生重新发报告。</p>`;finishRender('profile');
+}
+
+let readingSession=null,round=null;
+const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const readingSeconds=p=>Math.max(20,Math.min(180,Math.ceil(normalizeAnswer(p.paragraphs.join('')).length/6)));
+function readingRecord(id){return state.readingProgress[id]||(state.readingProgress[id]={ms:0,bottom:false});}
+function stopReading(){if(readingSession){clearInterval(readingSession.timer);readingSession.observer?.disconnect();readingSession=null;}}
+function readingTick(){
+ const s=readingSession;if(!s)return;
+ const now=performance.now(),elapsed=Math.max(0,Math.min(1500,now-s.last));s.last=now;
+ if(document.visibilityState==='hidden'||!overlay.hidden||!main.innerHTML.includes('id="pg-reader-end"'))return;
+ const record=readingRecord(s.id);record.ms=Math.min(readingSeconds(get())*1000,record.ms+elapsed);
+ updateReadingUI();if(++s.ticks%5===0)saveProgress();
+}
+function updateReadingUI(){
+ if(!readingSession)return;const p=all.find(x=>x.id===readingSession.id),r=readingRecord(p.id),seconds=readingSeconds(p),elapsed=Math.min(seconds,Math.floor(r.ms/1000));
+ $('#pg-reading-clock').textContent=`${elapsed} / ${seconds} 秒`;
+ $('#pg-reading-bottom').textContent=r.bottom?'已到达文末':'请读至全文末尾';
+ const button=$('[data-action="read"]'),ready=r.ms>=seconds*1000&&r.bottom;
+ button.disabled=!ready&&!state.readingVerified.has(p.id);
+ button.textContent=state.readingVerified.has(p.id)?'已通过阅读检查':ready?'开始3题阅读检查':'完成阅读条件后开始检查';
+}
+function markReadingEnd(){
+ if(!readingSession)return;const el=$('#pg-reader-end'),rect=el.getBoundingClientRect();
+ if(rect.top<(globalThis.innerHeight||800)&&rect.bottom>=0&&document.visibilityState!=='hidden'){
+  readingRecord(readingSession.id).bottom=true;updateReadingUI();saveProgress();
+ }
+}
+function startReading(p){
+ stopReading();readingRecord(p.id);readingSession={id:p.id,last:performance.now(),ticks:0,timer:null,observer:null,checks:null};
+ if(typeof IntersectionObserver!=='undefined'){
+  readingSession.observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&document.visibilityState!=='hidden'&&overlay.hidden&&readingSession?.id===p.id){readingRecord(p.id).bottom=true;updateReadingUI();saveProgress();}},{threshold:0.3});
+  readingSession.observer.observe($('#pg-reader-end'));
+ }
+ readingSession.timer=setInterval(readingTick,1000);updateReadingUI();
+}
+function finishRender(nav){
+ if(!main.innerHTML.includes('id="pg-reader-end"')&&!main.innerHTML.includes('id="pg-reading-checks"'))stopReading();
+ state.view=nav;root.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.nav===nav)));
+ header();saveProgress();if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:20,height:20}});
+}
+function welcomeBack(){
+ const encouragement=shuffle(['不必一下子背完很多，今天记牢一句，就是向前一步。','你认真读过的每一句，都会在需要的时候给你力量。','让今天的自己，比昨天多记住一点。我们慢慢来。'])[0];
+ returnFocus=document.activeElement;
+ overlay.innerHTML=`<section class="pg-dialog pg-welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="pg-welcome-title"><button type="button" id="pg-welcome-x" class="pg-dialog-x cursor-interaction" aria-label="关闭欢迎界面">×</button><div class="pg-medal">${icon('book-open')}</div><span class="pg-small">新的一程，从这一刻开始</span><h2 id="pg-welcome-title">欢迎回来，${esc(state.name)}。</h2><p>${encouragement}</p><button type="button" id="pg-close" class="pg-primary cursor-interaction">带着好心情，开始学习</button></section>`;
+ overlay.hidden=false;app.inert=true;
+ const close=()=>{overlay.hidden=true;app.inert=false;main.querySelector('button')?.focus();};
+ $('#pg-close').onclick=close;$('#pg-welcome-x').onclick=close;
+ overlay.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){const first=$('#pg-welcome-x'),last=$('#pg-close');if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}};
+ if(typeof lucide!=='undefined')lucide.createIcons({attrs:{width:24,height:24}});$('#pg-close').focus();
+}
+function home(){
+ const p=get();main.innerHTML=`<span class="pg-small">你好，${esc(state.name)} · 今天也向诗里走一步</span><h2>读一篇，记几句，走一程。</h2><div class="pg-home-grid"><section class="pg-hero"><span class="pg-small">继续学习 · ${books[p.bi].name}</span><h3>${p.title}</h3><p>${p.author}</p>${btn('阅读全文与阅读检查','lesson','pg-primary')}</section><section class="pg-hero"><h3>来一轮10题闯关</h3><p>接下句、补上句、句中填空，随机换题。</p>${btn('开始默写闯关','recall','pg-primary')}</section></div><div class="pg-section"><h3>努力看得见，奖励有标准</h3></div><div class="pg-home-grid"><section class="pg-explain"><strong>阅读奖励</strong><p>前台阅读计时＋到达文末＋3道随机检查全对，首次获得5经验、1墨点。</p></section><section class="pg-explain"><strong>连续答对奖励</strong><p>连对3题＋1墨点；5题＋2；10题＋5。同一档每天只领一次。</p></section></div><p class="pg-small">每道新题首次独立答对＋5经验、1墨点。答错或使用提示会中断连对；查看提示后答对不算独立通过。</p>`;finishRender('home');
+}
+function status(p){const n=completed(p.id);return `${state.readingVerified.has(p.id)?'阅读检查已通过':state.read.has(p.id)?'旧阅读记录 · 待检查':'尚未阅读检查'} · 独立通过 ${n} 题`;}
+function shelf(){main.innerHTML=`<span class="pg-small">按教材分册 · 古诗文选录</span><h2>把山河，收进书架。</h2><p class="pg-small">53篇全文 · 每篇都有多题默写，每轮随机抽取10题。</p><div class="pg-books">${books.map((b,i)=>{const n=b.items.filter(p=>state.readingVerified.has(p.id)).length;return `<button type="button" class="pg-book cursor-interaction" data-book="${i}"><span class="pg-cover">${b.short}<span>${b.type}</span></span><span class="pg-book-text"><strong>${b.name}</strong><small>${b.items.length}篇 · ${b.scene}</small><small>${n}篇通过阅读检查</small><span class="pg-progress"><span style="width:${100*n/b.items.length}%"></span></span></span>${icon('chevron-right')}</button>`;}).join('')}</div>`;finishRender('shelf');}
+function book(index,reset=true){
+ state.book=index;if(reset)state.filter='全部';const b=books[index],filters=['全部','待阅读检查','已阅读检查','已做练习'];
+ const items=b.items.filter(p=>state.filter==='全部'||(state.filter==='待阅读检查'&&!state.readingVerified.has(p.id))||(state.filter==='已阅读检查'&&state.readingVerified.has(p.id))||(state.filter==='已做练习'&&completed(p.id)>0));
+ main.innerHTML=`${btn('‹ 返回书架','shelf','pg-link')}<h2>${b.name}</h2><p class="pg-small">${b.items.length}篇选录 · 点进篇目阅读全文，再选择挑战</p><div class="pg-filters">${filters.map(t=>`<button type="button" data-filter="${t}" aria-pressed="${state.filter===t}" class="cursor-interaction">${t}</button>`).join('')}</div><div class="pg-list">${items.map(p=>`<button type="button" class="pg-entry cursor-interaction" data-poem="${p.id}"><span class="pg-entry-body"><strong>${p.title}</strong><small>${p.author} · ${status(p)}</small><small>${p.questions.length}道默写题可练习</small></span>${icon('chevron-right')}</button>`).join('')||'<p>这一分类还没有篇目。</p>'}</div>`;finishRender('shelf');
+}
+function lesson(id){
+ if(id)state.current=id;const p=get(),verified=state.readingVerified.has(p.id);round=null;
+ main.innerHTML=`${btn('‹ 返回本册篇目','book','pg-link')}<div class="pg-reader-layout"><article class="pg-reader-article"><span class="pg-small">${books[p.bi].name} · ${p.author}</span><h2>${esc(p.title)}</h2><span class="pg-tag">${p.scope}</span><div class="pg-full-original ${p.paragraphs.length>=4&&p.paragraphs.every(t=>t.length<100)?'pg-poetry-text':''}">${p.paragraphs.map(t=>`<p>${esc(t)}</p>`).join('')}</div><div id="pg-reader-end"><span class="pg-small">全文阅读至此</span><button type="button" data-action="read-end" class="pg-link cursor-interaction">我已读到文末</button></div><details><summary>原文资料来源</summary><p class="pg-small">节选篇目按课文选入范围呈现，具体字形请与所用教材核对。</p><a href="${p.source}" target="_blank" rel="noopener noreferrer">查看校读资料</a></details></article><aside class="pg-reader-tools"><section class="pg-reading-panel"><h3>阅读，也要有收获</h3><p class="pg-small">完成三个条件，再领取首次阅读奖励。</p><ol class="pg-reading-steps"><li>前台阅读 <strong id="pg-reading-clock">0 / ${readingSeconds(p)} 秒</strong></li><li><span id="pg-reading-bottom">请读至全文末尾</span></li><li>通过3道随机原文检查</li></ol>${btn(verified?'已通过阅读检查':'完成阅读条件后开始检查','read','pg-primary')}<p id="pg-reading-note" class="pg-small">${verified?'本篇检查已完成，重复阅读不再发放奖励。':'切换到后台或其他页面不计时。计时要求会随篇幅变化。'}</p></section><section class="pg-reading-panel"><h3>选择下一步挑战</h3><p class="pg-small">本篇有${p.questions.length}道默写题，已独立通过${completed(p.id)}题。</p>${btn('默写连续闯关 · 10题','recall','pg-primary')}${btn('情境混合闯关 · 10题','context')}<p class="pg-small">情境混合关会包含不同篇目的题目。</p></section></aside></div>`;
+ finishRender('shelf');startReading(p);
+}
+function makeReadingChecks(p){
+ const pool=p.questions.filter(q=>q.kind==='句中填空');
+ return [0,1,2].map(i=>{
+  const start=Math.floor(i*pool.length/3),end=Math.floor((i+1)*pool.length/3),q=shuffle(pool.slice(start,end))[0];
+  const alternatives=shuffle(questionBank.filter(x=>x.kind==='句中填空'&&normalizeAnswer(x.answer)!==normalizeAnswer(q.answer)&&x.answer.length===q.answer.length));
+  const words=[q.answer];for(const x of alternatives){if(!words.includes(x.answer))words.push(x.answer);if(words.length===4)break;}
+  return {q,options:shuffle(words)};
+ });
+}
+function read(){
+ const p=get(),r=readingRecord(p.id);
+ if(state.readingVerified.has(p.id))return;
+ if(r.ms<readingSeconds(p)*1000||!r.bottom){$('#pg-reading-note').textContent='先完成前台阅读时间，并阅读到全文末尾，再开始检查。';return;}
+ const checks=makeReadingChecks(p);stopReading();readingSession={id:p.id,checks,timer:null,last:performance.now()};
+ main.innerHTML=`${btn('‹ 返回原文','lesson','pg-link')}<span class="pg-small">《${p.title}》· 阅读检查</span><h2>刚读过的原文，还记得吗？</h2><p class="pg-small">请选出与原文一致的词语。3题全部答对，才能通过本次阅读检查。</p><div id="pg-reading-checks">${checks.map((item,i)=>`<fieldset class="pg-reading-question"><legend>第${i+1}题</legend><p class="pg-verse">${esc(item.q.cue)}</p><div class="pg-check-options">${item.options.map((word,j)=>`<label><input type="radio" name="reading-${i}" value="${j}"> ${esc(word)}</label>`).join('')}</div></fieldset>`).join('')}</div><div id="pg-reading-feedback" aria-live="polite"></div>${btn('提交阅读检查','check-reading','pg-primary')}`;finishRender('shelf');
+}
+function checkReading(){
+ const s=readingSession;if(!s?.checks||s.finished)return;
+ const chosen=s.checks.map((x,i)=>root.querySelector(`input[name="reading-${i}"]:checked`));
+ if(chosen.some(x=>!x)){$('#pg-reading-feedback').innerHTML='<p class="pg-error" role="alert">请先完成全部3题。</p>';return;}
+ const score=s.checks.filter((item,i)=>item.options[Number(chosen[i].value)]===item.q.answer).length;
+ s.finished=true;
+ if(score<3){$('#pg-reading-feedback').innerHTML=`<p class="pg-error">这次答对${score}/3题，还需要再读一遍。返回原文后会重新抽题。</p>`;root.querySelector('[data-action="check-reading"]').disabled=true;return;}
+ const p=get();state.readingVerified.add(p.id);state.read.add(p.id);const gain=award(p.id+'-read',5);saveProgress();lesson();
+ popup('这篇，认真读过了。',gain?'3道阅读检查全部通过，获得5经验和1墨点。':'3道阅读检查全部通过。原阅读奖励已经领取，本次不重复发放。',0,false);
+}
+function practice(mode,questionId){
+ let pool,owner=null;
+ if(mode==='review')pool=[...state.mistakes.keys()].map(k=>questionMap.get(k)).filter(Boolean);
+ else if(mode==='context')pool=questionBank.filter(q=>q.mode==='context');
+ else {pool=get().questions;owner=get().id;}
+ if(!pool.length){review();return;}
+ let queue=shuffle(pool),first=questionId&&questionMap.get(questionId);
+ if(mode==='context')first=questionMap.get(state.current+'-context');
+ const fresh=queue.filter(q=>!state.done.has(q.id)),known=queue.filter(q=>state.done.has(q.id));queue=[...fresh,...known];
+ if(first)queue=[first,...queue.filter(q=>q.id!==first.id)];
+ const seen=new Set(),selected=[];
+ if(mode==='recall'){
+  for(let lap=0;lap<3;lap++)for(const kind of ['接下句','补上句','句中填空']){
+   const q=queue.find(q=>q.kind===kind&&!seen.has(normalizeAnswer(q.answer)));
+   if(q){selected.push(q);seen.add(normalizeAnswer(q.answer));}
+  }
+ }
+ for(const q of queue){if(selected.length>=10)break;const key=normalizeAnswer(q.answer);if(!seen.has(key)){selected.push(q);seen.add(key);}}
+ queue=selected.slice(0,10);
+ round={kind:mode,owner,queue,index:0,correct:0,independent:0,streak:0,best:0,earnedXp:0,earnedInk:0,answered:false,hinted:false,finished:false,finalized:false};
+ stopReading();drawPractice();
+}
+function drawPractice(){
+ if(!round||round.finished)return;const q=round.queue[round.index],p=all.find(p=>p.id===q.poemId);state.current=p.id;state.mode=q.mode;state.hint=false;state.checked=false;
+ main.innerHTML=`${btn('‹ 结束本轮，返回篇目','lesson','pg-link')}<div class="pg-round-top"><span class="pg-tag">第${round.index+1} / ${round.queue.length}题</span><span id="pg-streak" class="pg-tag pg-gold-tag">连对 ${round.streak}题 · 本轮最高${round.best}题</span></div><p class="pg-small">《${p.title}》· ${p.author} · ${q.kind}</p><h2>${q.kind==='补上句'?'回忆它的上一句。':q.kind==='句中填空'?'把缺少的字词补完整。':q.mode==='context'?'循着意思，找到原句。':'让下一句，自己浮现。'}</h2><div class="pg-verse">${q.kind==='补上句'?'＿＿＿＿，<br>':''}${esc(q.cue)}${q.kind==='接下句'?'，<br>＿＿＿＿':''}</div><label for="pg-answer">${q.kind==='句中填空'?'只填写横线处缺少的字词':q.mode==='context'?'填写情境对应的完整片段':'填写缺少的分句'}</label><textarea id="pg-answer" rows="3" placeholder="标点与空格不计入判断"></textarea>${btn('给我一点提示（会中断连对）','hint','pg-link')}<p id="pg-hint" class="pg-small"></p><div id="pg-feedback" aria-live="polite"></div>${btn('确认答案','submit','pg-primary')}<button type="button" data-action="next-question" id="pg-next" class="pg-primary cursor-interaction" hidden>${round.index+1===round.queue.length?'查看本轮成果':'下一题，继续闯关'}</button><p class="pg-small">新题首次独立答对：＋5经验、1墨点。连对3 / 5 / 10题：额外＋1 / 2 / 5墨点，每档每天一次。</p>`;finishRender('shelf');
+}
+function hint(){
+ if(!round||round.answered||round.hinted)return;round.hinted=true;round.streak=0;state.hint=true;const q=round.queue[round.index];
+ $('#pg-hint').textContent=`从“${Array.from(q.answer).slice(0,q.answer.length<=3?1:2).join('')}”开始回忆。使用提示后，本题不计入独立通过，也不发放答题奖励。`;
+ root.querySelector('[data-action="hint"]').disabled=true;$('#pg-streak').textContent=`连对已中断 · 本轮最高${round.best}题`;
+}
+function giveInk(n,label){state.ink+=n;state.ledger.unshift({label,amount:n});if(round)round.earnedInk+=n;}
+function submit(){
+ if(!round||round.answered||round.finished)return;
+ const q=round.queue[round.index],answer=$('#pg-answer').value,feedback=$('#pg-feedback');
+ if(!normalizeAnswer(answer)){feedback.innerHTML='<p class="pg-error" role="alert">先写出你的答案，再确认。</p>';return;}
+ round.answered=true;state.checked=true;const ok=normalizeAnswer(answer)===normalizeAnswer(q.answer),independent=ok&&!round.hinted;
+ state.attempts.push({id:q.poemId,mode:q.mode,qid:q.id,ok,hint:round.hinted});
+ if(!ok){round.streak=0;state.mistakes.set(q.id,{id:q.poemId,mode:q.mode,qid:q.id});}
+ let gain=0,bonus=0;
+ if(ok)round.correct++;
+ if(independent){
+  round.independent++;round.streak++;round.best=Math.max(round.best,round.streak);state.bestStreak=Math.max(state.bestStreak,round.best);
+  state.done.add(q.id);state.mistakes.delete(q.id);
+  if(!state.earned.has(q.id)){const before=levelIndex();state.earned.add(q.id);state.xp+=5;gain=5;round.earnedXp+=5;giveInk(1,'首次独立答对：'+q.kind);if(levelIndex()>before)state.levelNotice=levels[levelIndex()].name;}
+  const milestones={3:1,5:2,10:5},key=todayKey()+':'+round.streak;
+  if(milestones[round.streak]&&!state.streakRewards.has(key)){bonus=milestones[round.streak];state.streakRewards.add(key);giveInk(bonus,`今日首次连对${round.streak}题`);}
+ }else if(ok)round.streak=0;
+ $('#pg-answer').readOnly=true;root.querySelector('[data-action="hint"]').disabled=true;root.querySelector('[data-action="submit"]').hidden=true;$('#pg-next').hidden=false;
+ $('#pg-streak').textContent=`连对 ${round.streak}题 · 本轮最高${round.best}题`;
+ feedback.innerHTML=`<div class="pg-feedback"><h3>${independent?'答对了，继续向前！':ok?'提示后答对，再独立试试。':'差一点，下一题重新开始。'}</h3><p>原文答案：${esc(q.answer)}</p>${q.original?`<p class="pg-small">完整分句：${esc(q.original)}</p>`:''}<span class="pg-small">${gain?'首次独立通过：＋5经验、1墨点。':independent?'这题的首次奖励已经领取，本次仍计入连对。':ok?'本题不计入独立通过，连对已重置。':'本题已加入错题，连对已重置。'}${bonus?` 连对奖励：额外＋${bonus}墨点！`:''}</span></div>`;
+ header();saveProgress();
+ if(bonus)popup(`连续答对${round.streak}题！`,`额外${bonus}墨点已经收好。保持自己的节奏，下一题继续。`,0,false);
+}
+function nextQuestion(){
+ if(!round||!round.answered||round.finished)return;
+ if(round.index+1>=round.queue.length){finishRound();return;}
+ round.index++;round.answered=false;round.hinted=false;drawPractice();
+}
+function finishRound(){
+ if(!round||round.finalized)return;round.finished=true;round.finalized=true;state.roundCount++;
+ let completion=0,badge=false;const key=round.owner?round.owner+':recall':round.kind==='context'?'mixed-context':null;
+ if(round.queue.length===10&&round.independent>=8&&key&&!state.roundRewards.has(key)){
+  state.roundRewards.add(key);completion=3;giveInk(3,'首次高分完成10题闯关');
+  if(round.owner&&!state.bookmarks.has(round.owner)){state.bookmarks.add(round.owner);badge=true;}
+ }
+ const owner=round.owner;
+ main.innerHTML=`<span class="pg-small">一轮闯关，认真走完了</span><h2>${round.independent>=8?'这一次，很有收获。':'每一次回忆，都在变得更熟。'}</h2><section class="pg-hero"><h3>独立答对 ${round.independent} / ${round.queue.length}题</h3><p>本轮最高连对 ${round.best}题<br>收获 ${round.earnedXp}经验、${round.earnedInk}墨点</p><span class="pg-small">${completion?'首次高分完成10题，额外3墨点已计入。':round.queue.length===10&&round.independent>=8?'本类首次通关奖励已领过，仍可继续练习。':'10题中独立答对至少8题，可领取该类首次通关奖励。'}${badge?' 新诗句书签已收藏。':''}</span></section><div class="pg-grid">${btn('再来一轮，换一组题','restart-round','pg-primary')}${btn('看看需要重练的题','review')}${btn(owner?'返回本篇原文':'返回书架',owner?'lesson':'shelf')}</div><p class="pg-small">闯关反映本次练习表现，全篇背诵和长期记忆仍需复习。</p>`;finishRender('shelf');saveProgress();
+}
+function restartRound(){const kind=round?.kind||'recall',owner=round?.owner;if(owner)state.current=owner;practice(kind);}
+function review(){
+ const errors=[...state.mistakes.keys()].map(id=>questionMap.get(id)).filter(Boolean);
+ main.innerHTML=`<span class="pg-small">把薄弱处，变成下一步</span><h2>再遇这些句子，会更从容。</h2><section class="pg-hero"><p>${state.readingVerified.size}篇通过阅读检查 · ${state.done.size}题独立通过<br>累计作答${state.attempts.length}次 · 完成${state.roundCount}轮闯关</p></section>${errors.length?btn('错题连续练习 · 最多10题','review-round','pg-primary'):''}<div class="pg-section"><h3>待重练 ${errors.length}题</h3></div><div class="pg-list">${errors.map(q=>{const p=all.find(p=>p.id===q.poemId);return `<button type="button" class="pg-entry cursor-interaction" data-retry="${q.id}"><span class="pg-entry-body"><strong>${p.title} · ${q.kind}</strong><small>${esc(q.cue)}</small></span>${icon('rotate-ccw')}</button>`;}).join('')||'<p>暂时没有待重练的错题。</p>'}</div>`;finishRender('review');
+}
+function levelPage(){
+ const li=levelIndex();main.innerHTML=`${btn('‹ 返回我的','profile','pg-link')}<h2>你的成长之路。</h2><span class="pg-tag">当前累计${state.xp}经验 · 历史最高连对${state.bestStreak}题</span>${levels.map((lv,i)=>`<div class="pg-level-row"><span class="pg-level-token">Lv.${i+1}</span><div><strong>${lv.name}${i===li?' · 当前':''}</strong><p class="pg-small">累计${lv.xp}经验 · ${i<=li?'已解锁':'待解锁'}</p><span class="pg-small">${lv.benefit}</span></div></div>`).join('')}<h3>奖励规则</h3><p>首次通过一篇阅读检查：5经验、1墨点。<br>每道新题首次独立答对：5经验、1墨点。<br>连对3 / 5 / 10题：额外1 / 2 / 5墨点，各档每天一次。<br>一轮10题独立答对至少8题：该篇默写或情境混合关首次通关，额外3墨点。</p><p class="pg-small">答错或使用提示会中断连对。同一道题的首次奖励、同一类的首次通关奖励都不会重复发放。兑换只扣墨点，不扣经验。</p>`;finishRender('profile');
 }
 
 root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
@@ -21171,10 +21446,10 @@ root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.di
  if(b.dataset.book!==undefined){book(Number(b.dataset.book));return;}
  if(b.dataset.poem){lesson(b.dataset.poem);return;}
  if(b.dataset.filter){state.filter=b.dataset.filter;book(state.book,false);return;}
- if(b.dataset.retry){const [id,mode]=b.dataset.retry.split('|');state.current=id;practice(mode);return;}
- const actions={home,shelf,profile,collection,teacher,'share-report':shareReport,'copy-report':copyReport,'import-report':importReport,levels:levelPage,shop,inventory,ledger,settings,welcome,'save-settings':saveSettings,'reset-look':()=>{state.equipped={avatar:'default',frame:'default',theme:'default'};applyLook();inventory();},book:()=>book(get().bi),lesson:()=>lesson(),read,recall:()=>practice('recall'),context:()=>practice('context'),hint,submit};if(actions[b.dataset.action])actions[b.dataset.action]();
+ if(b.dataset.retry){practice('review',b.dataset.retry);return;}
+ const actions={home,shelf,profile,collection,teacher,'read-end':markReadingEnd,'check-reading':checkReading,'next-question':nextQuestion,'restart-round':restartRound,'review-round':()=>practice('review'),'share-report':shareReport,'copy-report':copyReport,'import-report':importReport,levels:levelPage,shop,inventory,ledger,settings,welcome,'save-settings':saveSettings,'reset-look':()=>{state.equipped={avatar:'default',frame:'default',theme:'default'};applyLook();inventory();},book:()=>book(get().bi),lesson:()=>lesson(),read,recall:()=>practice('recall'),context:()=>practice('context'),hint,submit};if(actions[b.dataset.action])actions[b.dataset.action]();
 });
-applyLook();shelf();
+applyLook();shelf();welcomeBack();
 })();
 </script>
 
